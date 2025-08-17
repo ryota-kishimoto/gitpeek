@@ -54,6 +54,7 @@ final class GitCommand {
     // MARK: - Properties
     
     private let defaultTimeout: TimeInterval = 30.0
+    private let cacheLock = NSLock()
     private var validationCache: [String: Bool] = [:]
     
     // MARK: - Initialization
@@ -133,6 +134,8 @@ final class GitCommand {
     
     /// Clears the validation cache
     func clearCache() {
+        cacheLock.lock()
+        defer { cacheLock.unlock() }
         validationCache.removeAll()
     }
     
@@ -151,13 +154,19 @@ final class GitCommand {
         }
         
         // Check if it's a valid repository (use cache for performance)
-        if let cached = validationCache[path] {
+        cacheLock.lock()
+        let cached = validationCache[path]
+        cacheLock.unlock()
+        
+        if let cached = cached {
             if !cached {
                 throw GitError.invalidRepository(path: path)
             }
         } else {
             let isValid = Self.isValidRepository(at: path)
+            cacheLock.lock()
             validationCache[path] = isValid
+            cacheLock.unlock()
             if !isValid {
                 throw GitError.invalidRepository(path: path)
             }
