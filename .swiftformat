@@ -1,0 +1,151 @@
+# SwiftFormat Configuration for GitPeek
+# Apple Swift API Design Guidelines準拠
+
+# インデント
+--indent 4
+--indentcase false
+--indentstrings false
+--tabwidth 4
+--smarttabs enabled
+
+# 改行
+--linebreaks lf
+--maxwidth 120
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--wrapternary before-operators
+--wraptypealiases before-equals
+
+# スペース
+--operatorfunc spaced
+--ranges spaced
+--typedelimiter space
+--genericextensions angle-brackets
+--juxtaposedtypes angle-brackets
+--nospaceoperators ...,..<
+--trimwhitespace always
+--emptybraces no-space
+--spaceinsidebrackets false
+--spaceinsideparens false
+--spaceinsidecomments true
+--spacearoundoperators true
+--spacearoundbrackets false
+--spacearoundparens false
+--spacearoundgenerics false
+
+# セミコロン
+--semicolons never
+
+# 括弧
+--elseposition same-line
+--guardelse same-line
+--xcodeindentation disabled
+
+# self
+--self init-only
+--selfrequired 
+
+# インポート
+--importgrouping alpha
+--sortedimports enabled
+
+# その他のフォーマット
+--allman false
+--commas always
+--decimalgrouping 3,6
+--exponentcase lowercase
+--exponentgrouping disabled
+--fractiongrouping disabled
+--hexgrouping 4,8
+--hexliteralcase uppercase
+--octalgrouping 4,8
+--binarygrouping 4,8
+--patternlet hoist
+--stripunusedargs always
+--trailingclosures 
+--void empty
+
+# 列挙型
+--enumnamespaces always
+
+# マークとヘッダー
+--marktypes never
+--markextensions always
+--extensionacl on-declarations
+--header strip
+
+# 型推論
+--redundanttype inferred
+--redundantinit explicit
+--redundantlet remove
+--redundantpattern remove
+--redundantrawstring remove
+--redundantreturn remove
+--redundantself remove
+--redundantvoid remove
+--redundantfileprivate remove
+--redundantinternal remove
+--redundantoptional remove
+--redundantparens remove
+--redundantbackticks remove
+--redundantbreak remove
+--redundantclosure remove
+--redundantextension remove
+--redundantlet remove
+--redundantnilcoalescing remove
+--redundantternary remove
+
+# 修飾子の順序（Appleガイドライン準拠）
+--modifierorder public,open,private,fileprivate,internal,static,weak,unowned,objc,dynamic,convenience,override,required,final,lazy,optional
+
+# ライフサイクル
+--lifecycle 
+
+# 組織化
+--organizetypes class,struct,enum,extension,protocol
+--structthreshold 0
+--enumthreshold 0
+--extensionlength 0
+--typeblanklines remove
+
+# Yoda条件（定数を左側に置かない）
+--yodaconditions never
+
+# 関数の括弧
+--closurevoid remove
+--emptybraces no-space
+
+# アクセス制御
+--extensionacl on-declarations
+
+# コンディショナルコンパイル
+--ifdef no-indent
+
+# 空行
+--blanklinesbetweenscopes enabled
+--blanklineafterimports enabled
+
+# 数値リテラル
+--decimalgrouping 3
+--binarygrouping 4
+--octalgrouping 4
+--hexgrouping 4
+
+# 強制アンラップを避ける
+--forceunwrap error
+
+# 関数の引数
+--funcattributes preserve
+--typeattributes preserve
+--varattributes preserve
+
+# コメント
+--commentindent false
+--wrapcomments false
+
+# Swift 5.9 features
+--swiftversion 5.9
+
+# 除外パス
+--exclude Pods,Carthage,DerivedData,.build,${PWD}/.build

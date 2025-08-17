@@ -1,0 +1,9 @@
+project_name: gitpeek
+language: swift
+description: macOS menu bar Git repository manager
+repository_url: https://github.com/yourusername/gitpeek
+main_technologies:
+  - Swift
+  - SwiftUI
+  - Xcode
+  - macOS

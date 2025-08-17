@@ -1,0 +1,43 @@
+#!/bin/bash
+# GitPeek Commit Message Hook
+# コミットメッセージ形式を検証
+
+commit_regex='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore)(\(.+\))?: .{1,72}$'
+merge_regex='^Merge '
+
+# Get the commit message
+commit_message=$(cat "$1")
+
+# Allow merge commits
+if echo "$commit_message" | grep -qE "$merge_regex"; then
+    exit 0
+fi
+
+# Check commit message format
+if ! echo "$commit_message" | grep -qE "$commit_regex"; then
+    echo "❌ Invalid commit message format!"
+    echo ""
+    echo "📝 Format: <type>(<scope>): <subject>"
+    echo ""
+    echo "Types:"
+    echo "  feat:     新機能"
+    echo "  fix:      バグ修正"
+    echo "  docs:     ドキュメント"
+    echo "  style:    コードスタイル（動作に影響しない）"
+    echo "  refactor: リファクタリング"
+    echo "  perf:     パフォーマンス改善"
+    echo "  test:     テスト追加・修正"
+    echo "  build:    ビルドシステム"
+    echo "  ci:       CI/CD"
+    echo "  chore:    その他"
+    echo ""
+    echo "Examples:"
+    echo "  feat: add repository search functionality"
+    echo "  fix(git): resolve crash when repository path is invalid"
+    echo "  test: add unit tests for GitManager"
+    echo ""
+    echo "Your message: $commit_message"
+    exit 1
+fi
+
+echo "✅ Commit message format is valid"

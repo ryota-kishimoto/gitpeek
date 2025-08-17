@@ -1,0 +1,62 @@
+#!/bin/bash
+# GitPeek Pre-commit Hook
+# TDDとコード品質を保証
+
+set -e
+
+echo "🔍 Running pre-commit checks..."
+
+# SwiftLintチェック
+if which swiftlint >/dev/null; then
+    echo "📝 Checking SwiftLint..."
+    swiftlint --quiet
+    if [ $? -ne 0 ]; then
+        echo "❌ SwiftLint failed. Please fix warnings before committing."
+        echo "Run 'make lint-fix' to auto-fix some issues."
+        exit 1
+    fi
+    echo "✅ SwiftLint passed"
+else
+    echo "⚠️ SwiftLint not installed. Run 'make setup' to install."
+fi
+
+# SwiftFormatチェック
+if which swiftformat >/dev/null; then
+    echo "🎨 Checking SwiftFormat..."
+    swiftformat --lint . --quiet
+    if [ $? -ne 0 ]; then
+        echo "❌ SwiftFormat check failed."
+        echo "Run 'make format' to auto-format."
+        exit 1
+    fi
+    echo "✅ SwiftFormat passed"
+else
+    echo "⚠️ SwiftFormat not installed. Run 'make setup' to install."
+fi
+
+# テスト実行（高速な単体テストのみ）
+echo "🧪 Running unit tests..."
+if xcodebuild test -scheme GitPeek -destination 'platform=macOS' -only-testing:GitPeekTests/Unit -quiet 2>/dev/null; then
+    echo "✅ Unit tests passed"
+else
+    echo "❌ Unit tests failed. Please fix before committing."
+    echo "Remember: TDD - Red, Green, Refactor!"
+    exit 1
+fi
+
+# Force unwrapチェック
+echo "🔍 Checking for force unwraps..."
+FORCE_UNWRAPS=$(grep -r "!" --include="*.swift" GitPeek | grep -v "// swiftlint:disable" | grep -v "fatalError" || true)
+if [ ! -z "$FORCE_UNWRAPS" ]; then
+    echo "⚠️ Warning: Force unwraps detected. Consider using guard or if-let instead."
+fi
+
+# TODOチェック
+TODOS=$(grep -r "TODO\|FIXME" --include="*.swift" GitPeek GitPeekTests || true)
+if [ ! -z "$TODOS" ]; then
+    echo "📝 Reminder: You have TODOs in your code:"
+    echo "$TODOS"
+fi
+
+echo "✅ All pre-commit checks passed!"
+echo "🚀 Ready to commit!"
