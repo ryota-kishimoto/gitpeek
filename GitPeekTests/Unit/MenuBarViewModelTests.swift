@@ -7,7 +7,10 @@ final class MenuBarViewModelTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
+        // Create a fresh view model for each test
         viewModel = MenuBarViewModel()
+        // Clear any existing repositories
+        viewModel.repositories.forEach { viewModel.removeRepository($0) }
     }
     
     // MARK: - RED Phase: MenuBarViewModel Tests
