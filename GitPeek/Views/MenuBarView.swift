@@ -3,6 +3,7 @@ import SwiftUI
 struct MenuBarView: View {
     @StateObject private var viewModel = MenuBarViewModel()
     @State private var showingAddRepository = false
+    @State private var showingSettings = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -43,6 +44,9 @@ struct MenuBarView: View {
             case .failure(let error):
                 viewModel.errorMessage = error.localizedDescription
             }
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
         }
     }
     
@@ -145,6 +149,13 @@ struct MenuBarView: View {
             .buttonStyle(.plain)
             
             Spacer()
+            
+            Button {
+                showingSettings = true
+            } label: {
+                Image(systemName: "gearshape")
+            }
+            .buttonStyle(.plain)
             
             Button {
                 NSApplication.shared.terminate(nil)

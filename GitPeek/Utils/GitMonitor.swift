@@ -16,9 +16,11 @@ final class GitMonitor: ObservableObject {
     
     // MARK: - Initialization
     
-    init(repositoryStore: RepositoryStore, updateInterval: TimeInterval = 30.0) {
+    init(repositoryStore: RepositoryStore, updateInterval: TimeInterval? = nil) {
         self.repositoryStore = repositoryStore
-        self.updateInterval = updateInterval
+        // Use the stored preference or default to 30 seconds
+        let interval = updateInterval ?? UserDefaults.standard.double(forKey: "refreshInterval")
+        self.updateInterval = interval > 0 ? interval : 30.0
     }
     
     deinit {

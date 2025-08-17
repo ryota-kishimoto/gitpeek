@@ -100,26 +100,79 @@ final class MenuBarViewModel: ObservableObject {
     }
     
     func openInTerminal(repository: Repository) {
-        let script = """
-            tell application "Terminal"
-                activate
-                do script "cd '\(repository.path)'"
-            end tell
-        """
+        let terminal = UserDefaults.standard.string(forKey: "defaultTerminal") ?? "Terminal"
+        
+        let script: String
+        switch terminal {
+        case "iTerm2":
+            script = """
+                tell application "iTerm"
+                    activate
+                    create window with default profile
+                    tell current session of current window
+                        write text "cd '\(repository.path)'"
+                    end tell
+                end tell
+            """
+        case "Warp":
+            // Warp doesn't have AppleScript support, use URL scheme
+            let escapedPath = repository.path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? repository.path
+            if let url = URL(string: "warp://action/new_tab?path=\(escapedPath)") {
+                NSWorkspace.shared.open(url)
+            }
+            return
+        case "Hyper":
+            // Hyper doesn't have good AppleScript support
+            let escapedPath = repository.path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? repository.path
+            if let url = URL(string: "hyper://cd?path=\(escapedPath)") {
+                NSWorkspace.shared.open(url)
+            }
+            return
+        default: // Terminal
+            script = """
+                tell application "Terminal"
+                    activate
+                    do script "cd '\(repository.path)'"
+                end tell
+            """
+        }
         
         if let scriptObject = NSAppleScript(source: script) {
             var error: NSDictionary?
             scriptObject.executeAndReturnError(&error)
             
             if let error = error {
-                print("Error opening Terminal: \(error)")
+                print("Error opening \(terminal): \(error)")
             }
         }
     }
     
     func openInCursor(repository: Repository) {
+        let editor = UserDefaults.standard.string(forKey: "defaultEditor") ?? "Cursor"
         let escapedPath = repository.path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? repository.path
-        if let url = URL(string: "cursor://open?path=\(escapedPath)") {
+        
+        let urlString: String
+        switch editor {
+        case "VSCode":
+            urlString = "vscode://file/\(escapedPath)"
+        case "Sublime":
+            urlString = "subl://\(escapedPath)"
+        case "Xcode":
+            // Open with Xcode using NSWorkspace
+            let url = URL(fileURLWithPath: repository.path)
+            NSWorkspace.shared.open(
+                [url],
+                withApplicationAt: URL(fileURLWithPath: "/Applications/Xcode.app"),
+                configuration: NSWorkspace.OpenConfiguration()
+            )
+            return
+        case "Nova":
+            urlString = "nova://\(escapedPath)"
+        default: // Cursor
+            urlString = "cursor://open?path=\(escapedPath)"
+        }
+        
+        if let url = URL(string: urlString) {
             NSWorkspace.shared.open(url)
         }
     }
