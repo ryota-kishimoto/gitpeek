@@ -17,7 +17,8 @@ let package = Package(
         .executableTarget(
             name: "GitPeek",
             dependencies: [],
-            path: "GitPeek"
+            path: "GitPeek",
+            exclude: ["Assets.xcassets", "GitPeek.entitlements"]
         ),
         .testTarget(
             name: "GitPeekTests",
