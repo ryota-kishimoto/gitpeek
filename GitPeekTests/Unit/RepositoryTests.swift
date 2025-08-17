@@ -83,20 +83,23 @@ final class RepositoryTests: XCTestCase {
 
 // MARK: - RepositoryStore Tests
 
+@MainActor
 final class RepositoryStoreTests: XCTestCase {
     var store: RepositoryStore!
     var testDirectory: URL!
     
-    override func setUpWithError() throws {
+    override func setUp() {
+        super.setUp()
         store = RepositoryStore()
         
         // Create temporary directory for testing
         testDirectory = FileManager.default.temporaryDirectory
             .appendingPathComponent("test_repos_\(UUID().uuidString)")
-        try FileManager.default.createDirectory(at: testDirectory, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: testDirectory, withIntermediateDirectories: true)
     }
     
-    override func tearDownWithError() throws {
+    override func tearDown() {
+        super.tearDown()
         // Clean up
         try? FileManager.default.removeItem(at: testDirectory)
         store.clearAll()
