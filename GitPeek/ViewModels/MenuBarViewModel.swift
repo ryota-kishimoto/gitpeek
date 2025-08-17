@@ -14,8 +14,7 @@ final class MenuBarViewModel: ObservableObject {
     // MARK: - Private Properties
     
     private let repositoryStore = RepositoryStore()
-    private var refreshTimer: Timer?
-    private let refreshInterval: TimeInterval = 30.0
+    private let gitMonitor: GitMonitor
     
     // MARK: - Computed Properties
     
@@ -38,6 +37,8 @@ final class MenuBarViewModel: ObservableObject {
     // MARK: - Initialization
     
     init() {
+        gitMonitor = GitMonitor(repositoryStore: repositoryStore)
+        
         // Clear any existing repositories in test environment
         #if DEBUG
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
@@ -45,11 +46,11 @@ final class MenuBarViewModel: ObservableObject {
         }
         #endif
         loadRepositories()
-        startAutoRefresh()
+        gitMonitor.start()
     }
     
     deinit {
-        refreshTimer?.invalidate()
+        // GitMonitor will clean up in its own deinit
     }
     
     // MARK: - Public Methods
@@ -83,13 +84,13 @@ final class MenuBarViewModel: ObservableObject {
     
     func refreshAll() async {
         isRefreshing = true
-        await repositoryStore.updateAll()
+        await gitMonitor.forceUpdate()
         loadRepositories()
         isRefreshing = false
     }
     
     func refreshRepository(_ repository: Repository) async {
-        await repositoryStore.updateRepository(repository.id)
+        await gitMonitor.updateRepository(repository)
         loadRepositories()
     }
     
@@ -173,18 +174,5 @@ final class MenuBarViewModel: ObservableObject {
     
     private func loadRepositories() {
         repositories = repositoryStore.repositories
-    }
-    
-    private func startAutoRefresh() {
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: refreshInterval, repeats: true) { _ in
-            Task { @MainActor in
-                await self.refreshAll()
-            }
-        }
-    }
-    
-    private func stopAutoRefresh() {
-        refreshTimer?.invalidate()
-        refreshTimer = nil
     }
 }
