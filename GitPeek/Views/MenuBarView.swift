@@ -61,7 +61,7 @@ struct MenuBarView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("GitPeek")
                     .font(.headline)
-                Text("v1.0.2")
+                Text("v1.0.4")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -213,7 +213,7 @@ struct RepositoryRowView: View {
                         if !status.stagedFiles.isEmpty {
                             Label("\(status.stagedFiles.count)", systemImage: "plus.circle.fill")
                                 .font(.caption)
-                                .foregroundColor(.green)
+                                .foregroundColor(.blue)
                         }
                         
                         if !status.modifiedFiles.isEmpty {

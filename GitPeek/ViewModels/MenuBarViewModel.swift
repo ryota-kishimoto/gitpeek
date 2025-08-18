@@ -137,14 +137,39 @@ final class MenuBarViewModel: ObservableObject {
             }
             return
         default: // Terminal
-            script = """
-                tell application "Terminal"
-                    activate
-                    tell application "System Events" to keystroke "t" using command down
-                    delay 0.5
-                    do script "cd '\(repository.path)'" in front window
-                end tell
-            """
+            // Use a simpler approach - just open Terminal app with the directory
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+            task.arguments = ["-a", "Terminal", repository.path]
+            
+            do {
+                try task.run()
+                task.waitUntilExit()
+                
+                // Now send the cd command using AppleScript
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                    let cdScript = """
+                        tell application "Terminal"
+                            if (count of windows) > 0 then
+                                do script "cd '\(repository.path.replacingOccurrences(of: "'", with: "'\\''"))'" in window 1
+                            end if
+                        end tell
+                    """
+                    
+                    if let scriptObject = NSAppleScript(source: cdScript) {
+                        var error: NSDictionary?
+                        scriptObject.executeAndReturnError(&error)
+                        if let error = error {
+                            print("Error sending cd command: \(error)")
+                        }
+                    }
+                }
+                print("Opened Terminal for: \(repository.path)")
+            } catch {
+                print("Failed to open Terminal: \(error)")
+                errorMessage = "Failed to open Terminal: \(error.localizedDescription)"
+            }
+            return
         }
         
         if let scriptObject = NSAppleScript(source: script) {
@@ -183,20 +208,8 @@ final class MenuBarViewModel: ObservableObject {
         case "Nova":
             urlString = "nova://\(escapedPath)"
         default: // Cursor
-            // Use shell command to open in new window
-            let task = Process()
-            task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-            task.arguments = ["-n", "-a", "Cursor", repository.path]
-            
-            do {
-                try task.run()
-                print("Opened Cursor with new window for: \(repository.path)")
-                return
-            } catch {
-                print("Failed to open Cursor: \(error)")
-                errorMessage = "Failed to open Cursor: \(error.localizedDescription)"
-                return
-            }
+            // Use URL scheme for Cursor
+            urlString = "cursor://file/\(escapedPath)"
         }
         
         print("Opening URL: \(urlString)")
