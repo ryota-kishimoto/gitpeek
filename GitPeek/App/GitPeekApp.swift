@@ -29,6 +29,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         popover.contentViewController = NSHostingController(rootView: MenuBarView())
         popover.behavior = .transient
+        popover.animates = true
     }
     
     @objc private func togglePopover() {

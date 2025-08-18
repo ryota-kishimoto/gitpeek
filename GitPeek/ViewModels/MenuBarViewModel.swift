@@ -57,6 +57,12 @@ final class MenuBarViewModel: ObservableObject {
     
     func togglePopover() {
         isShowingPopover.toggle()
+        // Auto-refresh when opening the popover
+        if isShowingPopover {
+            Task {
+                await refreshAll()
+            }
+        }
     }
     
     func addRepository(path: String) async throws {
@@ -100,7 +106,9 @@ final class MenuBarViewModel: ObservableObject {
     }
     
     func openInTerminal(repository: Repository) {
+        print("Opening in Terminal: \(repository.path)")
         let terminal = UserDefaults.standard.string(forKey: "defaultTerminal") ?? "Terminal"
+        print("Using terminal: \(terminal)")
         
         let script: String
         switch terminal {
@@ -148,8 +156,11 @@ final class MenuBarViewModel: ObservableObject {
     }
     
     func openInCursor(repository: Repository) {
+        print("Opening in Cursor: \(repository.path)")
         let editor = UserDefaults.standard.string(forKey: "defaultEditor") ?? "Cursor"
+        print("Using editor: \(editor)")
         let escapedPath = repository.path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? repository.path
+        print("Escaped path: \(escapedPath)")
         
         let urlString: String
         switch editor {
@@ -169,11 +180,16 @@ final class MenuBarViewModel: ObservableObject {
         case "Nova":
             urlString = "nova://\(escapedPath)"
         default: // Cursor
-            urlString = "cursor://open?path=\(escapedPath)"
+            urlString = "cursor://file/\(escapedPath)"
         }
         
+        print("Opening URL: \(urlString)")
         if let url = URL(string: urlString) {
+            print("URL created successfully, opening...")
             NSWorkspace.shared.open(url)
+        } else {
+            print("Failed to create URL")
+            errorMessage = "Failed to open in \(editor)"
         }
     }
     

@@ -220,13 +220,13 @@ struct RepositoryRowView: View {
                         if !status.untrackedFiles.isEmpty {
                             Label("\(status.untrackedFiles.count)", systemImage: "questionmark.circle.fill")
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundColor(.blue)
                         }
                         
                         if status.isClean {
                             Label("Clean", systemImage: "checkmark.circle.fill")
                                 .font(.caption)
-                                .foregroundColor(.green)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
