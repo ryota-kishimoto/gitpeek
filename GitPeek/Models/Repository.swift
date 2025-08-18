@@ -1,5 +1,22 @@
 import Foundation
 
+// MARK: - Worktree
+
+/// Represents a Git worktree
+struct Worktree: Codable, Equatable {
+    let path: String
+    let branch: String
+    let commit: String
+    let isMain: Bool
+    
+    init(path: String, branch: String, commit: String, isMain: Bool = false) {
+        self.path = path
+        self.branch = branch
+        self.commit = commit
+        self.isMain = isMain
+    }
+}
+
 // MARK: - Repository
 
 /// Represents a Git repository
@@ -11,6 +28,9 @@ struct Repository: Identifiable, Codable, Equatable {
     var gitStatus: GitStatus?
     var lastFetchedAt: Date?
     var remoteURL: String?
+    var worktrees: [Worktree]?
+    var isWorktree: Bool = false
+    var mainWorktreePath: String?
     
     init(path: String, name: String? = nil, id: UUID = UUID()) {
         self.id = id
@@ -20,6 +40,9 @@ struct Repository: Identifiable, Codable, Equatable {
         self.gitStatus = nil
         self.lastFetchedAt = nil
         self.remoteURL = nil
+        self.worktrees = nil
+        self.isWorktree = false
+        self.mainWorktreePath = nil
     }
     
     mutating func updateStatus(_ status: GitStatus, branch: String) {
@@ -30,6 +53,15 @@ struct Repository: Identifiable, Codable, Equatable {
     
     mutating func updateRemoteURL(_ url: String?) {
         self.remoteURL = url
+    }
+    
+    mutating func updateWorktrees(_ worktrees: [Worktree]) {
+        self.worktrees = worktrees
+        // Check if current path is a worktree
+        if let firstWorktree = worktrees.first {
+            self.isWorktree = (path != firstWorktree.path)
+            self.mainWorktreePath = firstWorktree.path
+        }
     }
 }
 

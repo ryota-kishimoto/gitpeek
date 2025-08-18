@@ -61,7 +61,7 @@ struct MenuBarView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("GitPeek")
                     .font(.headline)
-                Text("v1.0.4")
+                Text("v1.0.5")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -192,11 +192,17 @@ struct RepositoryRowView: View {
             // Repository Info
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
-                    Image(systemName: "folder")
+                    Image(systemName: repository.isWorktree ? "folder.badge.questionmark" : "folder")
                         .foregroundColor(.accentColor)
                     
                     Text(repository.name)
                         .font(.system(size: 13, weight: .medium))
+                    
+                    if repository.isWorktree {
+                        Image(systemName: "arrow.triangle.branch")
+                            .font(.system(size: 10))
+                            .foregroundColor(.orange)
+                    }
                     
                     if let branch = repository.currentBranch {
                         Text(branch)
@@ -261,6 +267,23 @@ struct RepositoryRowView: View {
                     Menu {
                         Button("Open on GitHub", action: onOpenOnGitHub)
                         Button("Copy Branch Name", action: onCopyBranch)
+                        
+                        if let worktrees = repository.worktrees, !worktrees.isEmpty {
+                            Divider()
+                            Menu("Worktrees") {
+                                ForEach(worktrees, id: \.path) { worktree in
+                                    HStack {
+                                        if worktree.isMain {
+                                            Label("\(worktree.branch) (main)", systemImage: "star")
+                                        } else {
+                                            Text(worktree.branch)
+                                        }
+                                    }
+                                    .disabled(true)
+                                }
+                            }
+                        }
+                        
                         Divider()
                         Button("Remove", action: onRemove)
                     } label: {

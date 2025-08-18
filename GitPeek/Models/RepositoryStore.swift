@@ -44,9 +44,11 @@ final class RepositoryStore: ObservableObject {
             let status = try await gitCommand.getStatus(at: path)
             let branch = try await gitCommand.getCurrentBranch(at: path)
             let remoteURL = try await gitCommand.getRemoteURL(at: path)
+            let worktrees = try await gitCommand.getWorktrees(at: path)
             
             repository.updateStatus(status, branch: branch)
             repository.updateRemoteURL(remoteURL)
+            repository.updateWorktrees(worktrees)
         } catch {
             // Still add the repository even if initial fetch fails
             print("Failed to fetch initial status: \(error)")
@@ -74,9 +76,11 @@ final class RepositoryStore: ObservableObject {
             let status = try await gitCommand.getStatus(at: repository.path)
             let branch = try await gitCommand.getCurrentBranch(at: repository.path)
             let remoteURL = try await gitCommand.getRemoteURL(at: repository.path)
+            let worktrees = try await gitCommand.getWorktrees(at: repository.path)
             
             repositories[index].updateStatus(status, branch: branch)
             repositories[index].updateRemoteURL(remoteURL)
+            repositories[index].updateWorktrees(worktrees)
         } catch {
             print("Failed to update repository \(repository.name): \(error)")
         }

@@ -132,6 +132,58 @@ final class GitCommand {
         }
     }
     
+    /// Gets the list of worktrees for the repository
+    func getWorktrees(at path: String) async throws -> [Worktree] {
+        do {
+            let output = try await execute("git worktree list --porcelain", at: path)
+            let lines = output.components(separatedBy: .newlines)
+            
+            var worktrees: [Worktree] = []
+            var currentPath: String?
+            var currentCommit: String?
+            var currentBranch: String?
+            var isMainWorktree = true
+            
+            for line in lines {
+                if line.starts(with: "worktree ") {
+                    // Save previous worktree if exists
+                    if let path = currentPath, let commit = currentCommit, let branch = currentBranch {
+                        worktrees.append(Worktree(
+                            path: path,
+                            branch: branch,
+                            commit: String(commit.prefix(7)), // Short commit hash
+                            isMain: isMainWorktree
+                        ))
+                        isMainWorktree = false // Only first is main
+                    }
+                    currentPath = String(line.dropFirst(9))
+                } else if line.starts(with: "HEAD ") {
+                    currentCommit = String(line.dropFirst(5))
+                } else if line.starts(with: "branch ") {
+                    currentBranch = String(line.dropFirst(7))
+                        .replacingOccurrences(of: "refs/heads/", with: "")
+                } else if line.starts(with: "detached") {
+                    currentBranch = "detached"
+                }
+            }
+            
+            // Add last worktree
+            if let path = currentPath, let commit = currentCommit, let branch = currentBranch {
+                worktrees.append(Worktree(
+                    path: path,
+                    branch: branch,
+                    commit: String(commit.prefix(7)),
+                    isMain: isMainWorktree
+                ))
+            }
+            
+            return worktrees
+        } catch {
+            // If worktree command fails, return empty array (older git versions)
+            return []
+        }
+    }
+    
     /// Clears the validation cache
     func clearCache() {
         cacheLock.lock()
