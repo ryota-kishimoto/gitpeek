@@ -29,7 +29,7 @@ struct Repository: Identifiable, Codable, Equatable {
     var lastFetchedAt: Date?
     var remoteURL: String?
     var worktrees: [Worktree]?
-    var isWorktree: Bool = false
+    var isWorktree: Bool?
     var mainWorktreePath: String?
     
     init(path: String, name: String? = nil, id: UUID = UUID()) {

@@ -192,13 +192,13 @@ struct RepositoryRowView: View {
             // Repository Info
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
-                    Image(systemName: repository.isWorktree ? "folder.badge.questionmark" : "folder")
+                    Image(systemName: repository.isWorktree == true ? "folder.badge.questionmark" : "folder")
                         .foregroundColor(.accentColor)
                     
                     Text(repository.name)
                         .font(.system(size: 13, weight: .medium))
                     
-                    if repository.isWorktree {
+                    if repository.isWorktree == true {
                         Image(systemName: "arrow.triangle.branch")
                             .font(.system(size: 10))
                             .foregroundColor(.orange)
