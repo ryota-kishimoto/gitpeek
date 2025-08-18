@@ -5,27 +5,6 @@ struct MenuBarView: View {
     @State private var showingAddRepository = false
     @State private var showingSettings = false
     
-    // 開発者がよく使うディレクトリを優先
-    private var defaultDirectory: URL {
-        let fm = FileManager.default
-        let home = fm.homeDirectoryForCurrentUser
-        
-        // ~/Developer が存在すればそれを使う
-        let developerPath = home.appendingPathComponent("Developer")
-        if fm.fileExists(atPath: developerPath.path) {
-            return developerPath
-        }
-        
-        // ~/Documents/Developer が存在すればそれを使う
-        let docsDeveloperPath = home.appendingPathComponent("Documents/Developer")
-        if fm.fileExists(atPath: docsDeveloperPath.path) {
-            return docsDeveloperPath
-        }
-        
-        // それ以外はホームディレクトリ
-        return home
-    }
-    
     var body: some View {
         VStack(spacing: 0) {
             headerView
@@ -50,10 +29,20 @@ struct MenuBarView: View {
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
-        .onChange(of: showingAddRepository) { newValue in
-            if newValue {
-                showingAddRepository = false
-                selectRepositoryFolder()
+        .fileImporter(
+            isPresented: $showingAddRepository,
+            allowedContentTypes: [.folder],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                if let url = urls.first {
+                    Task {
+                        try? await viewModel.addRepository(path: url.path)
+                    }
+                }
+            case .failure(let error):
+                viewModel.errorMessage = error.localizedDescription
             }
         }
         .sheet(isPresented: $showingSettings) {
@@ -176,31 +165,6 @@ struct MenuBarView: View {
             .buttonStyle(.plain)
         }
         .padding()
-    }
-    
-    // MARK: - Private Methods
-    
-    private func selectRepositoryFolder() {
-        let panel = NSOpenPanel()
-        panel.title = "Select Git Repository"
-        panel.message = "Choose a Git repository folder to add to GitPeek"
-        panel.prompt = "Add Repository"
-        panel.allowsMultipleSelection = false
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.canCreateDirectories = false
-        panel.allowedContentTypes = [.folder]
-        
-        // 開始ディレクトリを設定
-        panel.directoryURL = defaultDirectory
-        
-        panel.begin { response in
-            if response == .OK, let url = panel.url {
-                Task {
-                    try? await viewModel.addRepository(path: url.path)
-                }
-            }
-        }
     }
 }
 
