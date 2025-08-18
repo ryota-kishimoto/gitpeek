@@ -2,6 +2,8 @@ import SwiftUI
 
 struct MenuBarView: View {
     @StateObject private var viewModel = MenuBarViewModel()
+    @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.theme) var theme
     @State private var showingSettings = false
     let closePopover: (() -> Void)?
     
@@ -26,7 +28,7 @@ struct MenuBarView: View {
             footerView
         }
         .frame(width: 350, height: 450)
-        .background(Color.white)
+        .background(theme.primaryBackground)
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("OK") {
                 viewModel.errorMessage = nil
@@ -36,6 +38,7 @@ struct MenuBarView: View {
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
+                .environmentObject(themeManager)
         }
     }
     
@@ -50,7 +53,7 @@ struct MenuBarView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("GitPeek")
                     .font(.headline)
-                Text("v1.0.8")
+                Text("v1.1.0")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -72,7 +75,7 @@ struct MenuBarView: View {
             }
         }
         .padding()
-        .background(Color.gray.opacity(0.05))
+        .background(theme.headerFooterBackground)
     }
     
     // MARK: - Empty State View
@@ -166,7 +169,7 @@ struct MenuBarView: View {
             .buttonStyle(.plain)
         }
         .padding()
-        .background(Color.gray.opacity(0.05))
+        .background(theme.headerFooterBackground)
     }
 }
 
@@ -182,6 +185,7 @@ struct RepositoryRowView: View {
     let onCopyBranch: () -> Void
     let onRemove: () -> Void
     
+    @Environment(\.theme) var theme
     @State private var isHovered = false
     
     var body: some View {
@@ -206,7 +210,7 @@ struct RepositoryRowView: View {
                             .font(.system(size: 11))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.accentColor.opacity(0.2))
+                            .background(theme.branchTagBackground)
                             .cornerRadius(4)
                     }
                 }
@@ -216,25 +220,25 @@ struct RepositoryRowView: View {
                         if !status.stagedFiles.isEmpty {
                             Label("\(status.stagedFiles.count)", systemImage: "plus.circle.fill")
                                 .font(.caption)
-                                .foregroundColor(.blue)
+                                .foregroundColor(theme.stagedStatus)
                         }
                         
                         if !status.modifiedFiles.isEmpty {
                             Label("\(status.modifiedFiles.count)", systemImage: "pencil.circle.fill")
                                 .font(.caption)
-                                .foregroundColor(status.modifiedFiles.count == 1 ? .secondary : .orange)
+                                .foregroundColor(status.modifiedFiles.count == 1 ? theme.secondaryText : theme.modifiedStatus)
                         }
                         
                         if !status.untrackedFiles.isEmpty {
                             Label("\(status.untrackedFiles.count)", systemImage: "questionmark.circle.fill")
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundColor(theme.untrackedStatus)
                         }
                         
                         if status.isClean {
                             Label("Clean", systemImage: "checkmark.circle.fill")
                                 .font(.caption)
-                                .foregroundColor(.mint)
+                                .foregroundColor(theme.cleanStatus)
                         }
                     }
                 }
@@ -294,7 +298,7 @@ struct RepositoryRowView: View {
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(isSelected ? Color.blue.opacity(0.08) : (isHovered ? Color.gray.opacity(0.05) : Color.clear))
+                .fill(isSelected ? theme.selectedBackground : (isHovered ? theme.hoverBackground : Color.clear))
         )
         .onTapGesture {
             onSelect()

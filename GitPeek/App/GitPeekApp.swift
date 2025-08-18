@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 @main
 struct GitPeekApp: App {
@@ -11,13 +12,19 @@ struct GitPeekApp: App {
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+@MainActor
+class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     private var statusItem: NSStatusItem?
     private var popover = NSPopover()
     private var eventMonitor: Any?
+    private var themeManager = ThemeManager.shared
+    private var cancellables = Set<AnyCancellable>()
     
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        setupMenuBar()
+    nonisolated func applicationDidFinishLaunching(_ notification: Notification) {
+        Task { @MainActor in
+            setupMenuBar()
+            setupThemeObserver()
+        }
     }
     
     private func setupMenuBar() {
@@ -31,7 +38,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let menuBarView = MenuBarView(closePopover: { [weak self] in
             self?.closePopover()
         })
-        popover.contentViewController = NSHostingController(rootView: menuBarView)
+        .environmentObject(themeManager)
+        .environment(\.theme, themeManager.currentTheme)
+        popover.contentViewController = NSHostingController(rootView: AnyView(menuBarView))
         popover.behavior = .applicationDefined  // 完全に手動制御
         popover.animates = true
     }
@@ -65,5 +74,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             NSEvent.removeMonitor(monitor)
             eventMonitor = nil
         }
+    }
+    
+    private func setupThemeObserver() {
+        themeManager.$currentTheme
+            .sink { [weak self] newTheme in
+                guard let self = self else { return }
+                // Recreate the view with new theme
+                if let contentViewController = self.popover.contentViewController as? NSHostingController<AnyView> {
+                    let menuBarView = MenuBarView(closePopover: { [weak self] in
+                        self?.closePopover()
+                    })
+                    .environmentObject(self.themeManager)
+                    .environment(\.theme, newTheme)
+                    
+                    contentViewController.rootView = AnyView(menuBarView)
+                }
+            }
+            .store(in: &cancellables)
     }
 }

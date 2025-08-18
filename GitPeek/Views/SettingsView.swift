@@ -7,6 +7,7 @@ struct SettingsView: View {
     @AppStorage("defaultTerminal") private var defaultTerminal: String = "Terminal"
     @AppStorage("defaultEditor") private var defaultEditor: String = "Cursor"
     
+    @EnvironmentObject var themeManager: ThemeManager
     @State private var showingAbout = false
     @Environment(\.dismiss) private var dismiss
     
@@ -60,6 +61,11 @@ struct SettingsView: View {
                 Toggle("Show notifications for changes", isOn: $showNotifications)
                 
                 Toggle("Launch at login", isOn: $launchAtLogin)
+                
+                Divider()
+                
+                Toggle("Dark Mode", isOn: $themeManager.isDarkMode)
+                    .help("Switch between light and dark theme")
             } header: {
                 Text("General Settings")
                     .font(.headline)
