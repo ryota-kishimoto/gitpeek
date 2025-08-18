@@ -42,13 +42,7 @@
 
 ## 📦 Installation
 
-### Homebrew (Recommended)
-
-```bash
-brew install --cask gitpeek
-```
-
-### Direct Download
+### Direct Download (Recommended)
 
 1. Download the latest release from [Releases](https://github.com/gitpeek/gitpeek/releases)
 2. Open the DMG file
@@ -62,10 +56,13 @@ brew install --cask gitpeek
 git clone https://github.com/gitpeek/gitpeek.git
 cd gitpeek
 
-# Open in Xcode
-open GitPeek.xcodeproj
+# Option 1: Build with script (no Xcode required)
+./build.sh
+open GitPeek.app
 
-# Build and run (⌘+R)
+# Option 2: Build with Xcode
+open Package.swift
+# Then press ⌘+R to build and run
 ```
 
 ## 🚀 Usage

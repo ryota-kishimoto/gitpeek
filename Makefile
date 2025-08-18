@@ -56,12 +56,22 @@ fix: lint-fix format ## Lint and Format 自動修正
 .PHONY: build
 build: ## Debug ビルド
 	@echo "🔨 Building Debug..."
-	@xcodebuild -scheme GitPeek -configuration Debug build
+	@swift build
 
 .PHONY: build-release
 build-release: ## Release ビルド
 	@echo "🔨 Building Release..."
-	@xcodebuild -scheme GitPeek -configuration Release build
+	@swift build -c release
+
+.PHONY: app
+app: ## スタンドアロンアプリをビルド (Xcode不要)
+	@echo "📱 Building standalone app..."
+	@./build.sh
+
+.PHONY: install
+install: app ## アプリをビルドして /Applications にインストール
+	@cp -r GitPeek.app /Applications/
+	@echo "✅ GitPeek installed to /Applications"
 
 .PHONY: clean
 clean: ## ビルドをクリーン
