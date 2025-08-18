@@ -58,8 +58,13 @@ struct MenuBarView: View {
                 .font(.title2)
                 .foregroundColor(.accentColor)
             
-            Text("GitPeek")
-                .font(.headline)
+            VStack(alignment: .leading, spacing: 0) {
+                Text("GitPeek")
+                    .font(.headline)
+                Text("v1.0.1")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
             
             Spacer()
             

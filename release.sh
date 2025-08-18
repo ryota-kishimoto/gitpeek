@@ -7,7 +7,7 @@ set -e
 
 # Configuration
 APP_NAME="GitPeek"
-VERSION="1.0.0"
+VERSION="1.0.1"
 RELEASE_NAME="GitPeek v${VERSION}"
 RELEASE_TAG="v${VERSION}"
 
