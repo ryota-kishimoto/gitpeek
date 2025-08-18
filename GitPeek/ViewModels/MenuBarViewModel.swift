@@ -75,6 +75,30 @@ final class MenuBarViewModel: ObservableObject {
         }
     }
     
+    func selectRepositoryFolder() {
+        let openPanel = NSOpenPanel()
+        openPanel.title = "Select Git Repository"
+        openPanel.message = "Choose a Git repository folder to add to GitPeek"
+        openPanel.showsResizeIndicator = true
+        openPanel.showsHiddenFiles = true
+        openPanel.canChooseFiles = false
+        openPanel.canChooseDirectories = true
+        openPanel.canCreateDirectories = false
+        openPanel.allowsMultipleSelection = false
+        
+        openPanel.begin { response in
+            if response == .OK, let url = openPanel.url {
+                Task { @MainActor in
+                    do {
+                        try await self.addRepository(path: url.path)
+                    } catch {
+                        self.errorMessage = error.localizedDescription
+                    }
+                }
+            }
+        }
+    }
+    
     func removeRepository(_ repository: Repository) {
         repositoryStore.remove(repository.id)
         loadRepositories()

@@ -2,7 +2,6 @@ import SwiftUI
 
 struct MenuBarView: View {
     @StateObject private var viewModel = MenuBarViewModel()
-    @State private var showingAddRepository = false
     @State private var showingSettings = false
     
     var body: some View {
@@ -29,22 +28,6 @@ struct MenuBarView: View {
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
-        .fileImporter(
-            isPresented: $showingAddRepository,
-            allowedContentTypes: [.folder],
-            allowsMultipleSelection: false
-        ) { result in
-            switch result {
-            case .success(let urls):
-                if let url = urls.first {
-                    Task {
-                        try? await viewModel.addRepository(path: url.path)
-                    }
-                }
-            case .failure(let error):
-                viewModel.errorMessage = error.localizedDescription
-            }
-        }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
         }
@@ -61,7 +44,7 @@ struct MenuBarView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("GitPeek")
                     .font(.headline)
-                Text("v1.0.5")
+                Text("v1.0.6")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -101,7 +84,7 @@ struct MenuBarView: View {
                 .foregroundColor(.secondary)
             
             Button("Add Repository") {
-                showingAddRepository = true
+                viewModel.selectRepositoryFolder()
             }
         }
         .frame(maxHeight: .infinity)
@@ -147,7 +130,7 @@ struct MenuBarView: View {
     private var footerView: some View {
         HStack {
             Button {
-                showingAddRepository = true
+                viewModel.selectRepositoryFolder()
             } label: {
                 Label("Add Repository", systemImage: "plus")
             }
