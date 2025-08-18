@@ -50,7 +50,7 @@ brew install --cask gitpeek
 
 ### Direct Download
 
-1. Download the latest release from [Releases](https://github.com/yourusername/gitpeek/releases)
+1. Download the latest release from [Releases](https://github.com/gitpeek/gitpeek/releases)
 2. Open the DMG file
 3. Drag GitPeek to your Applications folder
 4. Launch GitPeek from Applications
@@ -59,7 +59,7 @@ brew install --cask gitpeek
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/gitpeek.git
+git clone https://github.com/gitpeek/gitpeek.git
 cd gitpeek
 
 # Open in Xcode
@@ -157,8 +157,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📮 Support
 
-- **Bug Reports**: [GitHub Issues](https://github.com/yourusername/gitpeek/issues)
-- **Feature Requests**: [GitHub Discussions](https://github.com/yourusername/gitpeek/discussions)
+- **Bug Reports**: [GitHub Issues](https://github.com/gitpeek/gitpeek/issues)
+- **Feature Requests**: [GitHub Discussions](https://github.com/gitpeek/gitpeek/discussions)
 - **Security Issues**: Please email security@gitpeek.app
 
 ## 🗺️ Roadmap
