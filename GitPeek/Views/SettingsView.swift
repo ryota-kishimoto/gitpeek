@@ -8,25 +8,40 @@ struct SettingsView: View {
     @AppStorage("defaultEditor") private var defaultEditor: String = "Cursor"
     
     @State private var showingAbout = false
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        TabView {
-            generalSettings
-                .tabItem {
-                    Label("General", systemImage: "gear")
+        VStack(spacing: 0) {
+            // タイトルバー
+            HStack {
+                Text("Settings")
+                    .font(.headline)
+                Spacer()
+                Button("Done") {
+                    dismiss()
                 }
+                .keyboardShortcut(.defaultAction)
+            }
+            .padding()
             
-            externalAppsSettings
-                .tabItem {
-                    Label("External Apps", systemImage: "app.dashed")
-                }
-            
-            advancedSettings
-                .tabItem {
-                    Label("Advanced", systemImage: "wrench.and.screwdriver")
-                }
+            TabView {
+                generalSettings
+                    .tabItem {
+                        Label("General", systemImage: "gear")
+                    }
+                
+                externalAppsSettings
+                    .tabItem {
+                        Label("External Apps", systemImage: "app.dashed")
+                    }
+                
+                advancedSettings
+                    .tabItem {
+                        Label("Advanced", systemImage: "wrench.and.screwdriver")
+                    }
+            }
         }
-        .frame(width: 500, height: 400)
+        .frame(width: 500, height: 450)
     }
     
     // MARK: - General Settings
@@ -64,9 +79,9 @@ struct SettingsView: View {
                 }
             }
         }
-        .padding()
+        .padding(20)
         .sheet(isPresented: $showingAbout) {
-            AboutView()
+            AboutView(isPresented: $showingAbout)
         }
     }
     
@@ -102,7 +117,7 @@ struct SettingsView: View {
             
             Spacer()
         }
-        .padding()
+        .padding(20)
     }
     
     // MARK: - Advanced Settings
@@ -135,7 +150,7 @@ struct SettingsView: View {
             
             Spacer()
         }
-        .padding()
+        .padding(20)
     }
     
     // MARK: - Actions
@@ -157,6 +172,8 @@ struct SettingsView: View {
 // MARK: - About View
 
 struct AboutView: View {
+    @Binding var isPresented: Bool
+    
     var body: some View {
         VStack(spacing: 20) {
             Image(systemName: "folder.badge.gearshape")
@@ -187,12 +204,17 @@ struct AboutView: View {
             
             Spacer()
             
-            Text("© 2024 GitPeek. All rights reserved.")
+            Text("© 2025 GitPeek. All rights reserved.")
                 .font(.caption)
                 .foregroundColor(.secondary)
+            
+            Button("Close") {
+                isPresented = false
+            }
+            .padding(.bottom)
         }
-        .padding()
-        .frame(width: 350, height: 400)
+        .padding(20)
+        .frame(width: 350, height: 450)
     }
 }
 
