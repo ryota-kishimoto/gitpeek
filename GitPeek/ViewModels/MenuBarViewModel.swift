@@ -140,7 +140,9 @@ final class MenuBarViewModel: ObservableObject {
             script = """
                 tell application "Terminal"
                     activate
-                    do script "cd '\(repository.path)'"
+                    tell application "System Events" to keystroke "t" using command down
+                    delay 0.5
+                    do script "cd '\(repository.path)'" in front window
                 end tell
             """
         }
@@ -151,6 +153,7 @@ final class MenuBarViewModel: ObservableObject {
             
             if let error = error {
                 print("Error opening \(terminal): \(error)")
+                errorMessage = "Failed to open Terminal"
             }
         }
     }
@@ -180,7 +183,20 @@ final class MenuBarViewModel: ObservableObject {
         case "Nova":
             urlString = "nova://\(escapedPath)"
         default: // Cursor
-            urlString = "cursor://file/\(escapedPath)"
+            // Use shell command to open in new window
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+            task.arguments = ["-n", "-a", "Cursor", repository.path]
+            
+            do {
+                try task.run()
+                print("Opened Cursor with new window for: \(repository.path)")
+                return
+            } catch {
+                print("Failed to open Cursor: \(error)")
+                errorMessage = "Failed to open Cursor: \(error.localizedDescription)"
+                return
+            }
         }
         
         print("Opening URL: \(urlString)")

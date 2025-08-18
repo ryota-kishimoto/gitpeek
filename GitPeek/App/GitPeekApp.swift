@@ -39,6 +39,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             popover.performClose(nil)
         } else {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            
+            // モニタリングを開始して外側クリックを検知
+            if let window = popover.contentViewController?.view.window {
+                NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { event in
+                    if !window.frame.contains(NSEvent.mouseLocation) {
+                        self.popover.performClose(nil)
+                        return nil
+                    }
+                    return event
+                }
+            }
         }
     }
 }
