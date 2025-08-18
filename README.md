@@ -44,7 +44,7 @@
 
 ### Direct Download (Recommended)
 
-1. Download the latest release from [Releases](https://github.com/gitpeek/gitpeek/releases)
+1. Download the latest release from [Releases](https://github.com/ryota-kishimoto/gitpeek/releases)
 2. Open the DMG file
 3. Drag GitPeek to your Applications folder
 4. Launch GitPeek from Applications
@@ -53,7 +53,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/gitpeek/gitpeek.git
+git clone https://github.com/ryota-kishimoto/gitpeek.git
 cd gitpeek
 
 # Option 1: Build with script (no Xcode required)
@@ -154,8 +154,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📮 Support
 
-- **Bug Reports**: [GitHub Issues](https://github.com/gitpeek/gitpeek/issues)
-- **Feature Requests**: [GitHub Discussions](https://github.com/gitpeek/gitpeek/discussions)
+- **Bug Reports**: [GitHub Issues](https://github.com/ryota-kishimoto/gitpeek/issues)
+- **Feature Requests**: [GitHub Discussions](https://github.com/ryota-kishimoto/gitpeek/discussions)
 - **Security Issues**: Please email security@gitpeek.app
 
 ## 🗺️ Roadmap

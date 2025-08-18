@@ -197,9 +197,9 @@ struct AboutView: View {
                 .padding(.vertical)
             
             VStack(alignment: .leading, spacing: 8) {
-                Link("GitHub Repository", destination: URL(string: "https://github.com/gitpeek/gitpeek")!)
-                Link("Report an Issue", destination: URL(string: "https://github.com/gitpeek/gitpeek/issues")!)
-                Link("License: MIT", destination: URL(string: "https://github.com/gitpeek/gitpeek/blob/main/LICENSE")!)
+                Link("GitHub Repository", destination: URL(string: "https://github.com/ryota-kishimoto/gitpeek")!)
+                Link("Report an Issue", destination: URL(string: "https://github.com/ryota-kishimoto/gitpeek/issues")!)
+                Link("License: MIT", destination: URL(string: "https://github.com/ryota-kishimoto/gitpeek/blob/main/LICENSE")!)
             }
             
             Spacer()

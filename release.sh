@@ -114,7 +114,7 @@ Built with SwiftUI and love for the macOS developer community.
 
 ---
 
-**Full Changelog**: https://github.com/gitpeek/gitpeek/commits/${RELEASE_TAG}
+**Full Changelog**: https://github.com/ryota-kishimoto/gitpeek/commits/${RELEASE_TAG}
 EOF
 
 # Create GitHub release
