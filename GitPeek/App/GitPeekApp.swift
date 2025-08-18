@@ -28,7 +28,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.action = #selector(togglePopover)
         }
         
-        popover.contentViewController = NSHostingController(rootView: MenuBarView())
+        let menuBarView = MenuBarView(closePopover: { [weak self] in
+            self?.closePopover()
+        })
+        popover.contentViewController = NSHostingController(rootView: menuBarView)
         popover.behavior = .applicationDefined  // 完全に手動制御
         popover.animates = true
     }

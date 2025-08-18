@@ -3,6 +3,11 @@ import SwiftUI
 struct MenuBarView: View {
     @StateObject private var viewModel = MenuBarViewModel()
     @State private var showingSettings = false
+    let closePopover: (() -> Void)?
+    
+    init(closePopover: (() -> Void)? = nil) {
+        self.closePopover = closePopover
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -44,7 +49,7 @@ struct MenuBarView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("GitPeek")
                     .font(.headline)
-                Text("v1.0.6")
+                Text("v1.0.7")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -84,7 +89,10 @@ struct MenuBarView: View {
                 .foregroundColor(.secondary)
             
             Button("Add Repository") {
-                viewModel.selectRepositoryFolder()
+                closePopover?()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    viewModel.selectRepositoryFolder()
+                }
             }
         }
         .frame(maxHeight: .infinity)
@@ -130,7 +138,10 @@ struct MenuBarView: View {
     private var footerView: some View {
         HStack {
             Button {
-                viewModel.selectRepositoryFolder()
+                closePopover?()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    viewModel.selectRepositoryFolder()
+                }
             } label: {
                 Label("Add Repository", systemImage: "plus")
             }
@@ -220,7 +231,7 @@ struct RepositoryRowView: View {
                         if status.isClean {
                             Label("Clean", systemImage: "checkmark.circle.fill")
                                 .font(.caption)
-                                .foregroundColor(.green)
+                                .foregroundColor(.cyan)
                         }
                     }
                 }
