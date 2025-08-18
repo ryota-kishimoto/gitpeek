@@ -27,13 +27,14 @@
 - 🔄 **Real-time Status Updates** - Automatic refresh every 30 seconds
 - 🌿 **Branch Information** - Current branch name at a glance
 - 📝 **Change Preview** - See modified files and change counts
+- 🌲 **Git Worktree Support** - Detect and display Git worktrees with visual indicators
 - 🚀 **Quick Actions** - Open in your favorite tools with one click
   - Cursor
   - SourceTree
   - Terminal
   - GitHub/GitLab/Bitbucket
 - 🎨 **Native macOS Experience** - Built with SwiftUI for seamless integration
-- 🌙 **Dark Mode Support** - Automatically adapts to your system theme
+- ✨ **Clean Modern UI** - Optimized white-background interface for better readability
 
 ## 📋 Requirements
 
@@ -44,7 +45,7 @@
 
 ### Direct Download (Recommended)
 
-1. Download the latest release from [Releases](https://github.com/ryota-kishimoto/gitpeek/releases)
+1. Download the latest release from [Releases](https://github.com/gitpeek/gitpeek/releases)
 2. Open the DMG file
 3. Drag GitPeek to your Applications folder
 4. Launch GitPeek from Applications
@@ -53,7 +54,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/ryota-kishimoto/gitpeek.git
+git clone https://github.com/gitpeek/gitpeek.git
 cd gitpeek
 
 # Option 1: Build with script (no Xcode required)
@@ -92,6 +93,7 @@ open Package.swift
 - Number of modified files
 - Staged vs unstaged changes
 - Visual indicators for repository state
+- Git worktree detection and display
 
 #### Quick Actions
 - **Open in Cursor** - Launch Cursor IDE with the repository
@@ -141,6 +143,7 @@ swiftlint
 
 - Large repositories (1000+ files) may experience slower refresh rates
 - Some Git submodules might not be detected properly
+- Theme switching is not available in this version
 
 ## 📝 License
 
@@ -154,12 +157,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📮 Support
 
-- **Bug Reports**: [GitHub Issues](https://github.com/ryota-kishimoto/gitpeek/issues)
-- **Feature Requests**: [GitHub Discussions](https://github.com/ryota-kishimoto/gitpeek/discussions)
+- **Bug Reports**: [GitHub Issues](https://github.com/gitpeek/gitpeek/issues)
+- **Feature Requests**: [GitHub Discussions](https://github.com/gitpeek/gitpeek/discussions)
 - **Security Issues**: Please email security@gitpeek.app
 
 ## 🗺️ Roadmap
 
+- [x] Git worktree support (v1.2.0)
 - [ ] Pull request status integration
 - [ ] Simple commit functionality
 - [ ] Branch search and switching
@@ -167,6 +171,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Team settings sync
 - [ ] Multiple remote support
 - [ ] Conflict detection and resolution helpers
+- [ ] Dark mode theme support
 
 ---
 

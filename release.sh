@@ -7,7 +7,7 @@ set -e
 
 # Configuration
 APP_NAME="GitPeek"
-VERSION="1.0.1"
+VERSION="1.2.0"
 RELEASE_NAME="GitPeek v${VERSION}"
 RELEASE_TAG="v${VERSION}"
 
@@ -57,22 +57,54 @@ shasum -a 256 "${APP_NAME}-${VERSION}.dmg" > "${APP_NAME}-${VERSION}.dmg.sha256"
 
 # Create release notes
 echo "📝 Creating release notes..."
-cat > release_notes.md << EOF
+if [ -f "release_notes_1.2.0.md" ]; then
+    cp release_notes_1.2.0.md release_notes.md
+    # Add checksums to the release notes
+    echo "" >> release_notes.md
+    echo "### 🔐 Checksums" >> release_notes.md
+    echo "" >> release_notes.md
+    echo "\`\`\`" >> release_notes.md
+    cat "${APP_NAME}-${VERSION}.dmg.sha256" >> release_notes.md
+    echo "\`\`\`" >> release_notes.md
+else
+    cat > release_notes.md << EOF
 # ${RELEASE_NAME}
 
-## 🎉 First Release!
+## 🎉 Major Update with Stability Improvements!
 
-GitPeek is a lightweight macOS menu bar application for managing multiple Git repositories.
+This release brings significant improvements to stability, UI/UX, and introduces Git worktree support.
 
-### ✨ Features
+### ✨ New Features
 
-- 📊 Multiple repository management
-- 🔄 Real-time status updates (30-second intervals)
-- 🌿 Current branch display
-- 📝 Change count visualization
-- 🚀 Quick actions (Cursor, Terminal, GitHub, SourceTree)
-- ⚙️ Customizable settings
-- 🌙 Dark mode support
+- **Git Worktree Support** - Detect and display Git worktrees with visual indicators
+- **Simplified Theme System** - Clean, modern white-background UI optimized for readability
+- **Enhanced Repository Management** - Improved file dialog for adding repositories
+
+### 🐛 Bug Fixes
+
+- Fixed popover dismissal when clicking outside
+- Fixed Terminal app integration issues  
+- Fixed Cursor editor integration to open properly
+- Fixed file dialog crashes when selecting Desktop folder
+- Resolved repository data persistence issues
+- Fixed app startup crashes
+
+### 🎨 UI/UX Improvements
+
+- Changed Clean status color to mint for better visibility
+- Staged files now shown in blue
+- Single file modifications shown in gray for clarity
+- Improved hover and selection states
+- Added version display in menu header
+- Better visual hierarchy with subtle backgrounds
+
+### 🔧 Technical Improvements
+
+- Removed non-functional dark mode to simplify codebase
+- Reduced code complexity by ~200 lines
+- Improved build system for standalone app creation
+- Better error handling throughout
+- Enhanced AppleScript integration for Terminal
 
 ### 📦 Installation
 
@@ -87,21 +119,6 @@ GitPeek is a lightweight macOS menu bar application for managing multiple Git re
 - macOS 13.0 (Ventura) or later
 - Git installed on your system
 
-### 🛠️ Build Information
-
-- Architecture: Universal (Intel + Apple Silicon)
-- Swift Version: 5.9+
-- Minimum macOS: 13.0
-
-### 📝 Changelog
-
-#### New Features
-- Repository management system
-- Git status monitoring
-- External app integration
-- Settings screen
-- Auto-refresh functionality
-
 ### 🔐 Checksums
 
 \`\`\`
@@ -110,12 +127,13 @@ $(cat "${APP_NAME}-${VERSION}.dmg.sha256")
 
 ### 🙏 Acknowledgments
 
-Built with SwiftUI and love for the macOS developer community.
+Thanks to all users for their feedback and patience while we improved GitPeek!
 
 ---
 
-**Full Changelog**: https://github.com/ryota-kishimoto/gitpeek/commits/${RELEASE_TAG}
+**Full Changelog**: https://github.com/gitpeek/gitpeek/compare/v1.0.0...v1.2.0
 EOF
+fi
 
 # Create GitHub release
 echo "🌐 Creating GitHub release..."
