@@ -77,9 +77,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     }
     
     private func setupThemeObserver() {
-        themeManager.$currentTheme
-            .sink { [weak self] newTheme in
+        themeManager.$isDarkMode
+            .sink { [weak self] isDark in
                 guard let self = self else { return }
+                // Update the current theme
+                let newTheme: Theme = isDark ? DarkTheme() : LightTheme()
+                
                 // Recreate the view with new theme
                 if let contentViewController = self.popover.contentViewController as? NSHostingController<AnyView> {
                     let menuBarView = MenuBarView(closePopover: { [weak self] in

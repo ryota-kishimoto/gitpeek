@@ -102,9 +102,10 @@ class ThemeManager: ObservableObject {
         let savedDarkMode = UserDefaults.standard.bool(forKey: "isDarkMode")
         let useDarkMode: Bool
         
-        // Optionally sync with system appearance
+        // Check if we have a saved preference
         if UserDefaults.standard.object(forKey: "isDarkMode") == nil {
-            useDarkMode = NSApp.effectiveAppearance.name == .darkAqua
+            // Default to light mode if no preference is saved
+            useDarkMode = false
         } else {
             useDarkMode = savedDarkMode
         }
