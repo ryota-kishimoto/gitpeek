@@ -26,6 +26,7 @@ struct MenuBarView: View {
             footerView
         }
         .frame(width: 350, height: 450)
+        .background(Color.white)
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("OK") {
                 viewModel.errorMessage = nil
@@ -49,7 +50,7 @@ struct MenuBarView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("GitPeek")
                     .font(.headline)
-                Text("v1.0.7")
+                Text("v1.0.8")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -71,6 +72,7 @@ struct MenuBarView: View {
             }
         }
         .padding()
+        .background(Color.gray.opacity(0.05))
     }
     
     // MARK: - Empty State View
@@ -164,6 +166,7 @@ struct MenuBarView: View {
             .buttonStyle(.plain)
         }
         .padding()
+        .background(Color.gray.opacity(0.05))
     }
 }
 
@@ -231,7 +234,7 @@ struct RepositoryRowView: View {
                         if status.isClean {
                             Label("Clean", systemImage: "checkmark.circle.fill")
                                 .font(.caption)
-                                .foregroundColor(.cyan)
+                                .foregroundColor(.mint)
                         }
                     }
                 }
@@ -291,7 +294,7 @@ struct RepositoryRowView: View {
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(isSelected ? Color.accentColor.opacity(0.1) : (isHovered ? Color.gray.opacity(0.1) : Color.clear))
+                .fill(isSelected ? Color.blue.opacity(0.08) : (isHovered ? Color.gray.opacity(0.05) : Color.clear))
         )
         .onTapGesture {
             onSelect()
