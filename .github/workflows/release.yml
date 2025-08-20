@@ -1,0 +1,87 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: macos-latest
+    
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+          
+      - name: Build Release
+        run: |
+          xcodebuild -scheme GitPeek \
+            -configuration Release \
+            -derivedDataPath build \
+            -destination 'platform=macOS,arch=arm64' \
+            build
+            
+      - name: Create DMG
+        run: |
+          # Create a temporary directory for DMG contents
+          mkdir -p dmg_contents
+          cp -R build/Build/Products/Release/GitPeek dmg_contents/
+          
+          # Create DMG
+          hdiutil create -volname "GitPeek" \
+            -srcfolder dmg_contents \
+            -ov -format UDZO \
+            GitPeek-${{ github.ref_name }}.dmg
+            
+          # Generate SHA256
+          shasum -a 256 GitPeek-${{ github.ref_name }}.dmg > GitPeek-${{ github.ref_name }}.dmg.sha256
+          
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -z "$PREV_TAG" ]; then
+            echo "First release" > release_notes.md
+          else
+            echo "## What's Changed" > release_notes.md
+            echo "" >> release_notes.md
+            
+            # Get commit messages between tags
+            git log --pretty=format:"- %s" $PREV_TAG..HEAD >> release_notes.md
+          fi
+          
+          echo "## Installation" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "1. Download \`GitPeek-${{ github.ref_name }}.dmg\`" >> release_notes.md
+          echo "2. Open the DMG file" >> release_notes.md
+          echo "3. Drag GitPeek to your Applications folder" >> release_notes.md
+          echo "4. Launch GitPeek from Applications" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "## SHA256 Checksum" >> release_notes.md
+          echo "\`\`\`" >> release_notes.md
+          cat GitPeek-${{ github.ref_name }}.dmg.sha256 >> release_notes.md
+          echo "\`\`\`" >> release_notes.md
+          
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          prerelease: false
+          body_path: release_notes.md
+          files: |
+            GitPeek-${{ github.ref_name }}.dmg
+            GitPeek-${{ github.ref_name }}.dmg.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

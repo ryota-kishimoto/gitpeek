@@ -18,9 +18,9 @@ final class GitMonitor: ObservableObject {
     
     init(repositoryStore: RepositoryStore, updateInterval: TimeInterval? = nil) {
         self.repositoryStore = repositoryStore
-        // Use the stored preference or default to 30 seconds
+        // Use the stored preference or default to 10 seconds for more real-time updates
         let interval = updateInterval ?? UserDefaults.standard.double(forKey: "refreshInterval")
-        self.updateInterval = interval > 0 ? interval : 30.0
+        self.updateInterval = interval > 0 ? interval : 10.0
     }
     
     deinit {
@@ -64,7 +64,7 @@ final class GitMonitor: ObservableObject {
     func updateRepository(_ repository: Repository) async {
         guard let store = repositoryStore else { return }
         
-        // Update the repository through the store
+        // Update only this specific repository through the store
         await store.updateRepository(repository.id)
     }
     
@@ -73,14 +73,8 @@ final class GitMonitor: ObservableObject {
     private func updateAllRepositories() async {
         guard let store = repositoryStore else { return }
         
-        // Update all repositories in parallel
-        await withTaskGroup(of: Void.self) { group in
-            for repository in store.repositories {
-                group.addTask {
-                    await self.updateRepository(repository)
-                }
-            }
-        }
+        // Update all repositories directly via store
+        await store.updateAllRepositories()
         
         lastUpdateTime = Date()
         store.save()

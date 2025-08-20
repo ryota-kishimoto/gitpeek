@@ -57,9 +57,9 @@ final class MenuBarViewModel: ObservableObject {
     
     func togglePopover() {
         isShowingPopover.toggle()
-        // Auto-refresh when opening the popover
+        // Auto-refresh when opening the popover (immediate, not delayed)
         if isShowingPopover {
-            Task {
+            Task { @MainActor in
                 await refreshAll()
             }
         }
@@ -113,10 +113,12 @@ final class MenuBarViewModel: ObservableObject {
     }
     
     func refreshAll() async {
+        guard !isRefreshing else { return }
         isRefreshing = true
+        defer { isRefreshing = false }
+        
         await gitMonitor.forceUpdate()
         loadRepositories()
-        isRefreshing = false
     }
     
     func refreshRepository(_ repository: Repository) async {
@@ -243,6 +245,25 @@ final class MenuBarViewModel: ObservableObject {
         } else {
             print("Failed to create URL")
             errorMessage = "Failed to open in \(editor)"
+        }
+    }
+    
+    func pullRepository(_ repository: Repository) async {
+        do {
+            let result = try await repositoryStore.pullRepository(repository.id)
+            
+            // Show success message or handle result
+            if result.contains("Already up to date") {
+                print("Repository is already up to date")
+            } else {
+                print("Pull successful: \(result)")
+            }
+            
+            // Refresh only this repository
+            await refreshRepository(repository)
+        } catch {
+            print("Failed to pull repository: \(error)")
+            errorMessage = "Failed to pull: \(error.localizedDescription)"
         }
     }
     

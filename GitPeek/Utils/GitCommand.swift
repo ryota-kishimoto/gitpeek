@@ -132,6 +132,53 @@ final class GitCommand {
         }
     }
     
+    /// Pulls changes from the remote repository
+    /// - Parameter path: The path to the Git repository
+    /// - Returns: The output of the pull command
+    /// - Throws: GitError if the operation fails
+    func pull(at path: String) async throws -> String {
+        try validateRepositoryPath(path)
+        
+        let output = try await execute("git pull", at: path, timeout: 60.0)
+        return output.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+    /// Gets the number of commits the current branch is behind/ahead of origin
+    /// - Parameter path: The path to the Git repository
+    /// - Returns: A tuple of (behind, ahead) commit counts
+    /// - Throws: GitError if the operation fails
+    func getCommitDifference(at path: String) async throws -> (behind: Int, ahead: Int) {
+        try validateRepositoryPath(path)
+        
+        // First, fetch to ensure we have latest remote info (without merging)
+        _ = try? await execute("git fetch --quiet", at: path, timeout: 30.0)
+        
+        // Get current branch
+        let branch = try await getCurrentBranch(at: path)
+        
+        // Check if upstream exists
+        let upstreamExists = try? await execute("git rev-parse --abbrev-ref @{u}", at: path)
+        guard upstreamExists != nil else {
+            return (behind: 0, ahead: 0)
+        }
+        
+        // Get behind/ahead counts
+        do {
+            let output = try await execute("git rev-list --left-right --count HEAD...@{u}", at: path)
+            let parts = output.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: "\t")
+            
+            if parts.count == 2,
+               let ahead = Int(parts[0]),
+               let behind = Int(parts[1]) {
+                return (behind: behind, ahead: ahead)
+            }
+        } catch {
+            // If command fails, return zeros
+        }
+        
+        return (behind: 0, ahead: 0)
+    }
+    
     /// Gets the list of worktrees for the repository
     func getWorktrees(at path: String) async throws -> [Worktree] {
         do {

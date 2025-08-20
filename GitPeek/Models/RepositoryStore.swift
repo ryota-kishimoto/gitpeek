@@ -45,10 +45,12 @@ final class RepositoryStore: ObservableObject {
             let branch = try await gitCommand.getCurrentBranch(at: path)
             let remoteURL = try await gitCommand.getRemoteURL(at: path)
             let worktrees = try await gitCommand.getWorktrees(at: path)
+            let commitDiff = try await gitCommand.getCommitDifference(at: path)
             
             repository.updateStatus(status, branch: branch)
             repository.updateRemoteURL(remoteURL)
             repository.updateWorktrees(worktrees)
+            repository.updateCommitDifference(behind: commitDiff.behind, ahead: commitDiff.ahead)
         } catch {
             // Still add the repository even if initial fetch fails
             print("Failed to fetch initial status: \(error)")
@@ -77,10 +79,12 @@ final class RepositoryStore: ObservableObject {
             let branch = try await gitCommand.getCurrentBranch(at: repository.path)
             let remoteURL = try await gitCommand.getRemoteURL(at: repository.path)
             let worktrees = try await gitCommand.getWorktrees(at: repository.path)
+            let commitDiff = try await gitCommand.getCommitDifference(at: repository.path)
             
             repositories[index].updateStatus(status, branch: branch)
             repositories[index].updateRemoteURL(remoteURL)
             repositories[index].updateWorktrees(worktrees)
+            repositories[index].updateCommitDifference(behind: commitDiff.behind, ahead: commitDiff.ahead)
         } catch {
             print("Failed to update repository \(repository.name): \(error)")
         }
@@ -95,6 +99,24 @@ final class RepositoryStore: ObservableObject {
                 }
             }
         }
+    }
+    
+    /// Updates all repositories (alias for GitMonitor compatibility)
+    func updateAllRepositories() async {
+        await updateAll()
+    }
+    
+    /// Pulls changes for a repository
+    /// - Parameter id: Repository ID to pull
+    /// - Returns: Pull result message
+    func pullRepository(_ id: UUID) async throws -> String {
+        guard let repository = repositories.first(where: { $0.id == id }) else {
+            throw RepositoryError.notFound
+        }
+        
+        let result = try await gitCommand.pull(at: repository.path)
+        await updateRepository(id)
+        return result
     }
     
     /// Clears all repositories

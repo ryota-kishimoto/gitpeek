@@ -37,6 +37,11 @@ struct MenuBarView: View {
         .sheet(isPresented: $showingSettings) {
             SettingsView()
         }
+        .onAppear {
+            Task {
+                await viewModel.refreshAll()
+            }
+        }
     }
     
     // MARK: - Header View
@@ -50,7 +55,7 @@ struct MenuBarView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("GitPeek")
                     .font(.headline)
-                Text("v1.2.0")
+                Text("v1.2.1")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -127,6 +132,11 @@ struct MenuBarView: View {
                         },
                         onRemove: {
                             viewModel.removeRepository(repository)
+                        },
+                        onPull: {
+                            Task {
+                                await viewModel.pullRepository(repository)
+                            }
                         }
                     )
                 }
@@ -181,8 +191,10 @@ struct RepositoryRowView: View {
     let onOpenOnGitHub: () -> Void
     let onCopyBranch: () -> Void
     let onRemove: () -> Void
+    let onPull: () -> Void
     
     @State private var isHovered = false
+    @State private var showActions = false
     
     var body: some View {
         HStack {
@@ -202,12 +214,29 @@ struct RepositoryRowView: View {
                     }
                     
                     if let branch = repository.currentBranch {
-                        Text(branch)
-                            .font(.system(size: 11))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(AppTheme.branchTagBackground)
-                            .cornerRadius(4)
+                        HStack(spacing: 4) {
+                            Text(branch)
+                                .font(.system(size: 11))
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(AppTheme.branchTagBackground)
+                                .cornerRadius(4)
+                            
+                            // Show commit behind/ahead indicators
+                            if let behind = repository.commitsBehind, behind > 0 {
+                                Label("\(behind)", systemImage: "arrow.down.circle.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.orange)
+                                    .help("\(behind) commits behind origin")
+                            }
+                            
+                            if let ahead = repository.commitsAhead, ahead > 0 {
+                                Label("\(ahead)", systemImage: "arrow.up.circle.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.blue)
+                                    .help("\(ahead) commits ahead of origin")
+                            }
+                        }
                     }
                 }
                 
@@ -242,13 +271,16 @@ struct RepositoryRowView: View {
             
             Spacer()
             
-            // Action Buttons
-            if isHovered {
-                HStack(spacing: 4) {
+            // Action Buttons - Always visible but with opacity
+            HStack(spacing: 2) {
                     Button {
                         onOpenInCursor()
                     } label: {
                         Image(systemName: "cursorarrow.motionlines")
+                            .font(.system(size: 12))
+                            .frame(width: 24, height: 24)
+                            .background(Color.gray.opacity(0.001))
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .help("Open in Cursor")
@@ -257,11 +289,20 @@ struct RepositoryRowView: View {
                         onOpenInTerminal()
                     } label: {
                         Image(systemName: "terminal")
+                            .font(.system(size: 12))
+                            .frame(width: 24, height: 24)
+                            .background(Color.gray.opacity(0.001))
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .help("Open in Terminal")
                     
                     Menu {
+                        Button("Pull Changes", action: onPull)
+                            .disabled(repository.commitsBehind == 0 && repository.remoteURL == nil)
+                        
+                        Divider()
+                        
                         Button("Open on GitHub", action: onOpenOnGitHub)
                         Button("Copy Branch Name", action: onCopyBranch)
                         
@@ -285,10 +326,15 @@ struct RepositoryRowView: View {
                         Button("Remove", action: onRemove)
                     } label: {
                         Image(systemName: "ellipsis")
+                            .font(.system(size: 12))
+                            .frame(width: 24, height: 24)
+                            .background(Color.gray.opacity(0.001))
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                }
             }
+            .opacity(isHovered ? 1.0 : 0.0)
+            .animation(.easeInOut(duration: 0.15), value: isHovered)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -300,7 +346,10 @@ struct RepositoryRowView: View {
             onSelect()
         }
         .onHover { hovering in
-            isHovered = hovering
+            withAnimation(.easeInOut(duration: 0.1)) {
+                isHovered = hovering
+            }
         }
+        .contentShape(Rectangle())
     }
 }

@@ -1,0 +1,9 @@
+{
+  "commands": [
+    {
+      "name": "release",
+      "description": "Create a new release with tag and GitHub release",
+      "instructions": "Execute the following steps:\n1. Ask the user for the version number (e.g., v1.2.2)\n2. Ask for release notes or generate them from recent commits\n3. Create and push a git tag with the version\n4. GitHub Actions will automatically create the release\n5. Confirm the release was created successfully\n\nSteps:\n- Use `git tag -a vX.X.X -m \"Release vX.X.X\"` to create annotated tag\n- Use `git push origin vX.X.X` to push the tag\n- The GitHub Actions workflow will handle the rest"
+    }
+  ]
+}

@@ -31,6 +31,8 @@ struct Repository: Identifiable, Codable, Equatable {
     var worktrees: [Worktree]?
     var isWorktree: Bool?
     var mainWorktreePath: String?
+    var commitsBehind: Int?
+    var commitsAhead: Int?
     
     init(path: String, name: String? = nil, id: UUID = UUID()) {
         self.id = id
@@ -43,6 +45,8 @@ struct Repository: Identifiable, Codable, Equatable {
         self.worktrees = nil
         self.isWorktree = false
         self.mainWorktreePath = nil
+        self.commitsBehind = nil
+        self.commitsAhead = nil
     }
     
     mutating func updateStatus(_ status: GitStatus, branch: String) {
@@ -62,6 +66,11 @@ struct Repository: Identifiable, Codable, Equatable {
             self.isWorktree = (path != firstWorktree.path)
             self.mainWorktreePath = firstWorktree.path
         }
+    }
+    
+    mutating func updateCommitDifference(behind: Int, ahead: Int) {
+        self.commitsBehind = behind
+        self.commitsAhead = ahead
     }
 }
 
