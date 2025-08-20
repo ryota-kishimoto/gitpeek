@@ -42,6 +42,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if popover.isShown {
             closePopover()
         } else {
+            // Notify the view that popover will show
+            NotificationCenter.default.post(name: NSNotification.Name("PopoverWillShow"), object: nil)
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             startEventMonitor()
         }

@@ -69,6 +69,10 @@ final class MenuBarViewModel: ObservableObject {
         do {
             try await repositoryStore.add(path)
             loadRepositories()
+            // Refresh only the newly added repository
+            if let newRepo = repositories.first(where: { $0.path == path }) {
+                await refreshRepository(newRepo)
+            }
         } catch {
             errorMessage = error.localizedDescription
             throw error

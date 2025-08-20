@@ -34,6 +34,7 @@ final class GitMonitor: ObservableObject {
         guard !isMonitoring else { return }
         
         isMonitoring = true
+        print("[GitMonitor] Starting with interval: \(updateInterval) seconds")
         
         // Initial update
         Task {
@@ -41,7 +42,9 @@ final class GitMonitor: ObservableObject {
         }
         
         // Schedule periodic updates
-        timer = Timer.scheduledTimer(withTimeInterval: updateInterval, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: updateInterval, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            print("[GitMonitor] Timer fired - updating repositories")
             Task { @MainActor in
                 await self.updateAllRepositories()
             }
@@ -73,11 +76,13 @@ final class GitMonitor: ObservableObject {
     private func updateAllRepositories() async {
         guard let store = repositoryStore else { return }
         
+        print("[GitMonitor] Updating all repositories...")
         // Update all repositories directly via store
         await store.updateAllRepositories()
         
         lastUpdateTime = Date()
         store.save()
+        print("[GitMonitor] Update complete at \(lastUpdateTime!)")
     }
 }
 

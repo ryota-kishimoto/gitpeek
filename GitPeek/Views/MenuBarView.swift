@@ -37,7 +37,7 @@ struct MenuBarView: View {
         .sheet(isPresented: $showingSettings) {
             SettingsView()
         }
-        .onAppear {
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("PopoverWillShow"))) { _ in
             Task {
                 await viewModel.refreshAll()
             }

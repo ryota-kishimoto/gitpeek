@@ -25,22 +25,82 @@ jobs:
           
       - name: Build Release
         run: |
+          # Clean build
+          xcodebuild clean -scheme GitPeek
+          
+          # Build the app
           xcodebuild -scheme GitPeek \
             -configuration Release \
             -derivedDataPath build \
             -destination 'platform=macOS,arch=arm64' \
             build
             
+      - name: Create App Bundle
+        run: |
+          # Find the built executable
+          EXECUTABLE_PATH="build/Build/Products/Release/GitPeek"
+          
+          # Create app bundle structure
+          mkdir -p "GitPeek.app/Contents/MacOS"
+          mkdir -p "GitPeek.app/Contents/Resources"
+          
+          # Copy executable
+          cp "$EXECUTABLE_PATH" "GitPeek.app/Contents/MacOS/GitPeek"
+          
+          # Create Info.plist
+          cat > "GitPeek.app/Contents/Info.plist" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>GitPeek</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.gitpeek.GitPeek</string>
+    <key>CFBundleName</key>
+    <string>GitPeek</string>
+    <key>CFBundleDisplayName</key>
+    <string>GitPeek</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>${{ github.ref_name }}</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>13.0</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+</dict>
+</plist>
+EOF
+          
+          # Make executable
+          chmod +x "GitPeek.app/Contents/MacOS/GitPeek"
+          
+          # Sign the app (ad-hoc signing for now)
+          codesign --force --deep --sign - "GitPeek.app"
+          
       - name: Create DMG
         run: |
           # Create a temporary directory for DMG contents
           mkdir -p dmg_contents
-          cp -R build/Build/Products/Release/GitPeek dmg_contents/
           
-          # Create DMG
+          # Copy the app bundle
+          cp -R GitPeek.app dmg_contents/
+          
+          # Create symbolic link to Applications folder
+          ln -s /Applications dmg_contents/Applications
+          
+          # Create DMG with nice layout
           hdiutil create -volname "GitPeek" \
             -srcfolder dmg_contents \
             -ov -format UDZO \
+            -fs HFS+ \
             GitPeek-${{ github.ref_name }}.dmg
             
           # Generate SHA256
@@ -62,12 +122,14 @@ jobs:
             git log --pretty=format:"- %s" $PREV_TAG..HEAD >> release_notes.md
           fi
           
+          echo "" >> release_notes.md
           echo "## Installation" >> release_notes.md
           echo "" >> release_notes.md
           echo "1. Download \`GitPeek-${{ github.ref_name }}.dmg\`" >> release_notes.md
           echo "2. Open the DMG file" >> release_notes.md
           echo "3. Drag GitPeek to your Applications folder" >> release_notes.md
           echo "4. Launch GitPeek from Applications" >> release_notes.md
+          echo "5. Look for the folder icon in your menu bar" >> release_notes.md
           echo "" >> release_notes.md
           echo "## SHA256 Checksum" >> release_notes.md
           echo "\`\`\`" >> release_notes.md
