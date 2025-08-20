@@ -95,6 +95,11 @@ GitPeek.app
 dist/
 release/
 Archives/
+build_release/
+build_debug/
+GitPeek-*/
+default.profraw
+*.profdata
 
 # Secrets and credentials
 *.p12
