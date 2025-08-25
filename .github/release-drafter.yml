@@ -1,0 +1,82 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+
+categories:
+  - title: '🚀 新機能'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🐛 バグ修正'
+    labels:
+      - 'fix'
+      - 'bugfix'
+      - 'bug'
+  - title: '⚡ パフォーマンス改善'
+    labels:
+      - 'performance'
+  - title: '🔧 メンテナンス'
+    labels:
+      - 'chore'
+      - 'maintenance'
+  - title: '📝 ドキュメント'
+    labels:
+      - 'documentation'
+      - 'docs'
+  - title: '🔒 セキュリティ'
+    labels:
+      - 'security'
+  - title: '⬆️ 依存関係の更新'
+    labels:
+      - 'dependencies'
+
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&'
+
+version-resolver:
+  major:
+    labels:
+      - 'major'
+      - 'breaking-change'
+  minor:
+    labels:
+      - 'minor'
+      - 'feature'
+      - 'enhancement'
+  patch:
+    labels:
+      - 'patch'
+      - 'bug'
+      - 'bugfix'
+      - 'fix'
+      - 'hotfix'
+  default: patch
+
+exclude-labels:
+  - 'skip-changelog'
+  - 'WIP'
+
+autolabeler:
+  - label: 'documentation'
+    files:
+      - '*.md'
+  - label: 'ci'
+    files:
+      - '.github/**'
+  - label: 'dependencies'
+    files:
+      - 'Package.resolved'
+  - label: 'swift'
+    files:
+      - '*.swift'
+
+template: |
+  ## 変更内容
+  
+  $CHANGES
+  
+  ## 📊 統計
+  
+  - コントリビューター: $CONTRIBUTORS
+  - 含まれるPR数: <!-- Add PR count -->
+  
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION

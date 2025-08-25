@@ -1,0 +1,35 @@
+# CODEOWNERS
+# このファイルは自動的にレビュアーを割り当てるために使用されます
+
+# デフォルトオーナー
+* @ryota-kishimoto
+
+# Swift/アプリケーションコード
+*.swift @ryota-kishimoto
+/GitPeek/ @ryota-kishimoto
+
+# UI/Views
+/GitPeek/Views/ @ryota-kishimoto
+/GitPeek/ViewModels/ @ryota-kishimoto
+
+# ビルド設定
+Package.swift @ryota-kishimoto
+Package.resolved @ryota-kishimoto
+*.xcconfig @ryota-kishimoto
+
+# CI/CD
+/.github/workflows/ @ryota-kishimoto
+/.github/actions/ @ryota-kishimoto
+
+# ドキュメント
+*.md @ryota-kishimoto
+/docs/ @ryota-kishimoto
+
+# 設定ファイル
+.swiftlint.yml @ryota-kishimoto
+.swiftformat @ryota-kishimoto
+.gitignore @ryota-kishimoto
+
+# セキュリティ関連
+SECURITY.md @ryota-kishimoto
+/GitPeek/Utils/Security/ @ryota-kishimoto

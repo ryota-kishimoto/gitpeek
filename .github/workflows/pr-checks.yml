@@ -1,0 +1,90 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  # PRタイトルの検証
+  pr-title:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          
+  # PR本文にIssue番号があるか確認
+  check-linked-issues:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            
+            // Issue番号のパターンを検索
+            const issuePattern = /(close[sd]?|fix(e[sd])?|resolve[sd]?):?\s*#\d+/gi;
+            const hasLinkedIssue = issuePattern.test(body);
+            
+            if (!hasLinkedIssue && !pr.title.includes('[no-issue]')) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: '⚠️ このPRには関連するIssueがリンクされていません。\n\nPR本文に `Fixes #123` のような形式でIssue番号を追加するか、Issueが不要な場合はPRタイトルに `[no-issue]` を追加してください。'
+              });
+            }
+            
+  # コンフリクトチェック
+  conflict-check:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+            
+            if (pr.data.mergeable_state === 'dirty') {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: ['has-conflicts']
+              });
+            } else {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.pull_request.number,
+                  name: 'has-conflicts'
+                });
+              } catch (e) {
+                // ラベルが存在しない場合は無視
+              }
+            }

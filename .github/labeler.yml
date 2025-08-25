@@ -1,0 +1,72 @@
+# ファイルパスに基づく自動ラベル設定
+
+# コード変更
+swift:
+  - changed-files:
+    - any-glob-to-any-file: 
+      - '**/*.swift'
+      - 'Package.swift'
+
+# UI/View変更
+ui:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'GitPeek/Views/**'
+      - '**/*View.swift'
+
+# ビジネスロジック
+logic:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'GitPeek/ViewModels/**'
+      - 'GitPeek/Models/**'
+
+# テスト
+test:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'Tests/**'
+      - '**/*Test.swift'
+      - '**/*Tests.swift'
+
+# ドキュメント
+documentation:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '*.md'
+      - 'docs/**'
+      - '.github/*.md'
+
+# CI/CD
+ci:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**'
+      - '.github/actions/**'
+
+# 設定ファイル
+config:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.*rc'
+      - '*.json'
+      - '*.yml'
+      - '*.yaml'
+      - '.gitignore'
+
+# ビルド関連
+build:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'Package.swift'
+      - 'Package.resolved'
+      - '.swiftpm/**'
+      - 'build.sh'
+
+# セキュリティ
+security:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'SECURITY.md'
+      - '**/Auth*.swift'
+      - '**/Crypto*.swift'
