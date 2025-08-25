@@ -238,8 +238,51 @@ final class MenuBarViewModel: ObservableObject {
         case "Nova":
             urlString = "nova://\(escapedPath)"
         default: // Cursor
-            // Use URL scheme for Cursor with newWindow parameter
-            urlString = "cursor://file/\(escapedPath)?newWindow=true"
+            // First check if cursor CLI is available
+            let cursorPaths = [
+                "/usr/local/bin/cursor",
+                "\(NSHomeDirectory())/bin/cursor",
+                "/opt/homebrew/bin/cursor"
+            ]
+            
+            var cursorCLI: String? = nil
+            for path in cursorPaths {
+                if FileManager.default.fileExists(atPath: path) {
+                    cursorCLI = path
+                    break
+                }
+            }
+            
+            if let cursorPath = cursorCLI {
+                // Use cursor CLI with -n flag to force new window
+                let task = Process()
+                task.executableURL = URL(fileURLWithPath: cursorPath)
+                task.arguments = ["-n", repository.path]
+                
+                do {
+                    try task.run()
+                    task.waitUntilExit()
+                    print("Opened in new Cursor window via CLI: \(repository.path)")
+                    return
+                } catch {
+                    print("Failed to use cursor CLI: \(error)")
+                }
+            }
+            
+            // Fallback: Use open command with -n flag to force new instance
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+            task.arguments = ["-n", "-a", "Cursor", repository.path]
+            
+            do {
+                try task.run()
+                task.waitUntilExit()
+                print("Opened in new Cursor instance: \(repository.path)")
+            } catch {
+                print("Failed to open Cursor: \(error)")
+                errorMessage = "Failed to open in Cursor"
+            }
+            return
         }
         
         print("Opening URL: \(urlString)")
