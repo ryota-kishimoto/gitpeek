@@ -238,8 +238,8 @@ final class MenuBarViewModel: ObservableObject {
         case "Nova":
             urlString = "nova://\(escapedPath)"
         default: // Cursor
-            // Use URL scheme for Cursor
-            urlString = "cursor://file/\(escapedPath)"
+            // Use URL scheme for Cursor with newWindow parameter
+            urlString = "cursor://file/\(escapedPath)?newWindow=true"
         }
         
         print("Opening URL: \(urlString)")

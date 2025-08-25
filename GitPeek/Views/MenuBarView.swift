@@ -55,7 +55,7 @@ struct MenuBarView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("GitPeek")
                     .font(.headline)
-                Text("v1.2.1")
+                Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -127,6 +127,9 @@ struct MenuBarView: View {
                         onOpenOnGitHub: {
                             viewModel.openOnGitHub(repository: repository)
                         },
+                        onOpenInSourceTree: {
+                            viewModel.openInSourceTree(repository: repository)
+                        },
                         onCopyBranch: {
                             viewModel.copyBranchName(repository: repository)
                         },
@@ -189,6 +192,7 @@ struct RepositoryRowView: View {
     let onOpenInCursor: () -> Void
     let onOpenInTerminal: () -> Void
     let onOpenOnGitHub: () -> Void
+    let onOpenInSourceTree: () -> Void
     let onCopyBranch: () -> Void
     let onRemove: () -> Void
     let onPull: () -> Void
@@ -304,6 +308,8 @@ struct RepositoryRowView: View {
                         Divider()
                         
                         Button("Open on GitHub", action: onOpenOnGitHub)
+                        Button("Open in SourceTree", action: onOpenInSourceTree)
+                            .disabled(!FileManager.default.fileExists(atPath: "/Applications/SourceTree.app"))
                         Button("Copy Branch Name", action: onCopyBranch)
                         
                         if let worktrees = repository.worktrees, !worktrees.isEmpty {
