@@ -29,7 +29,7 @@ Create a new release with tag and GitHub release.
 rm -rf build/
 mkdir -p build
 
-# Kill existing GitPeek
+# Kill existing GitPeek FIRST (before build)
 pkill -f GitPeek || true
 
 # Build Release version
