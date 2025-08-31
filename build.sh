@@ -23,6 +23,9 @@ mkdir -p GitPeek.app/Contents/Resources
 # Copy executable
 cp .build/apple/Products/Release/GitPeek GitPeek.app/Contents/MacOS/
 
+# Get version from source Info.plist  
+VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "GitPeek/Info.plist" 2>/dev/null || echo "1.0.0")
+
 # Create Info.plist
 cat > GitPeek.app/Contents/Info.plist << EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -38,9 +41,9 @@ cat > GitPeek.app/Contents/Info.plist << EOF
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.2.0</string>
+    <string>${VERSION}</string>
     <key>CFBundleVersion</key>
-    <string>13</string>
+    <string>${VERSION}</string>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
     <key>LSUIElement</key>

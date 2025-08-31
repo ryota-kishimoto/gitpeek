@@ -7,7 +7,8 @@ set -e
 
 # Configuration
 APP_NAME="GitPeek"
-VERSION="1.2.0"
+# Get version from Info.plist
+VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "GitPeek/Info.plist" 2>/dev/null || echo "1.0.0")
 RELEASE_NAME="GitPeek v${VERSION}"
 RELEASE_TAG="v${VERSION}"
 
