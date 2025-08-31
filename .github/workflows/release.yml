@@ -29,7 +29,8 @@ jobs:
           
           # Clean build
           echo "🧹 Cleaning previous builds..."
-          xcodebuild clean -scheme GitPeek || {
+          xcodebuild clean -scheme GitPeek \
+            -destination 'platform=macOS' || {
             echo "❌ Failed to clean build"
             exit 1
           }
