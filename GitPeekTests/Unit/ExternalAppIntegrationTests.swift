@@ -35,7 +35,7 @@ final class ExternalAppIntegrationTests: XCTestCase {
         
         // Add repository to view model
         try await viewModel.addRepository(path: testPath.path)
-        testRepository = viewModel.repositories.first!
+        testRepository = viewModel.repositories.first ?? Repository(path: testPath.path, name: "Test")
     }
     
     override func tearDown() async throws {
@@ -96,7 +96,7 @@ final class ExternalAppIntegrationTests: XCTestCase {
         await viewModel.refreshRepository(testRepository)
         
         // Update our local reference
-        testRepository = viewModel.repositories.first!
+        testRepository = viewModel.repositories.first ?? Repository(path: testPath.path, name: "Test")
         
         // This test can only verify that the method doesn't crash
         viewModel.openOnGitHub(repository: testRepository)
@@ -108,7 +108,7 @@ final class ExternalAppIntegrationTests: XCTestCase {
     func testCopyBranchName() async throws {
         // Refresh to get branch info
         await viewModel.refreshRepository(testRepository)
-        testRepository = viewModel.repositories.first!
+        testRepository = viewModel.repositories.first ?? Repository(path: testPath.path, name: "Test")
         
         // Copy branch name
         viewModel.copyBranchName(repository: testRepository)

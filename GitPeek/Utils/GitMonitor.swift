@@ -82,7 +82,9 @@ final class GitMonitor: ObservableObject {
         
         lastUpdateTime = Date()
         store.save()
-        print("[GitMonitor] Update complete at \(lastUpdateTime!)")
+        if let time = lastUpdateTime {
+            print("[GitMonitor] Update complete at \(time)")
+        }
     }
 }
 

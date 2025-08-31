@@ -197,9 +197,15 @@ struct AboutView: View {
                 .padding(.vertical)
             
             VStack(alignment: .leading, spacing: 8) {
-                Link("GitHub Repository", destination: URL(string: "https://github.com/ryota-kishimoto/gitpeek")!)
-                Link("Report an Issue", destination: URL(string: "https://github.com/ryota-kishimoto/gitpeek/issues")!)
-                Link("License: MIT", destination: URL(string: "https://github.com/ryota-kishimoto/gitpeek/blob/main/LICENSE")!)
+                if let url = URL(string: "https://github.com/ryota-kishimoto/gitpeek") {
+                    Link("GitHub Repository", destination: url)
+                }
+                if let url = URL(string: "https://github.com/ryota-kishimoto/gitpeek/issues") {
+                    Link("Report an Issue", destination: url)
+                }
+                if let url = URL(string: "https://github.com/ryota-kishimoto/gitpeek/blob/main/LICENSE") {
+                    Link("License: MIT", destination: url)
+                }
             }
             
             Spacer()

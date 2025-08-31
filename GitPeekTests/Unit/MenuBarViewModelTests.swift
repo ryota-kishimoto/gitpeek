@@ -101,7 +101,10 @@ final class MenuBarViewModelTests: XCTestCase {
         process.waitUntilExit()
         
         try await viewModel.addRepository(path: testPath.path)
-        let repository = viewModel.repositories.first!
+        guard let repository = viewModel.repositories.first else {
+            XCTFail("Repository not found")
+            return
+        }
         
         // Act
         viewModel.selectRepository(repository)
@@ -127,7 +130,10 @@ final class MenuBarViewModelTests: XCTestCase {
         process.waitUntilExit()
         
         try await viewModel.addRepository(path: testPath.path)
-        let repository = viewModel.repositories.first!
+        guard let repository = viewModel.repositories.first else {
+            XCTFail("Repository not found")
+            return
+        }
         
         // Act
         viewModel.removeRepository(repository)

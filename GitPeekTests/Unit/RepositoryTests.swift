@@ -177,7 +177,10 @@ final class RepositoryStoreTests: XCTestCase {
         process.waitUntilExit()
         
         try await store.add(repoPath.path)
-        let repositoryId = store.repositories.first!.id
+        guard let repositoryId = store.repositories.first?.id else {
+            XCTFail("Repository not found")
+            return
+        }
         
         // Act
         store.remove(repositoryId)
