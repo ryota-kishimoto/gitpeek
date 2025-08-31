@@ -26,7 +26,10 @@ let package = Package(
         ),
         .testTarget(
             name: "GitPeekTests",
-            dependencies: ["GitPeek"],
+            dependencies: [
+                "GitPeek",
+                .product(name: "Sparkle", package: "Sparkle")
+            ],
             path: "GitPeekTests"
         )
     ]
