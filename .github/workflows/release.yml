@@ -25,15 +25,29 @@ jobs:
           
       - name: Build Release
         run: |
-          # Clean build
-          xcodebuild clean -scheme GitPeek
+          set -e  # Exit on error
           
-          # Build the app
+          # Clean build
+          echo "🧹 Cleaning previous builds..."
+          xcodebuild clean -scheme GitPeek || {
+            echo "❌ Failed to clean build"
+            exit 1
+          }
+          
+          # Build the app (Universal Binary for both Intel and Apple Silicon)
+          echo "🔨 Building Universal Binary..."
           xcodebuild -scheme GitPeek \
             -configuration Release \
             -derivedDataPath build \
-            -destination 'platform=macOS,arch=arm64' \
-            build
+            -destination 'platform=macOS' \
+            ARCHS="arm64 x86_64" \
+            ONLY_ACTIVE_ARCH=NO \
+            build || {
+            echo "❌ Build failed"
+            exit 1
+          }
+          
+          echo "✅ Build successful"
             
       - name: Create App Bundle
         run: |
@@ -123,12 +137,36 @@ PLIST_EOF
       - name: Sign DMG with Sparkle
         id: sparkle_sign
         run: |
+          set -e  # Exit on error
+          
+          # Check if private key exists
+          if [ -z "${{ secrets.SPARKLE_PRIVATE_KEY }}" ]; then
+            echo "❌ SPARKLE_PRIVATE_KEY secret not configured"
+            exit 1
+          fi
+          
           # Sign the DMG
+          echo "✍️ Signing DMG with Sparkle..."
           SIGNATURE=$(./bin/sign_update -s "${{ secrets.SPARKLE_PRIVATE_KEY }}" "GitPeek-${{ github.ref_name }}.dmg" 2>&1 | tail -1)
+          
+          # Verify signature was generated
+          if [ -z "$SIGNATURE" ] || [[ "$SIGNATURE" == *"error"* ]]; then
+            echo "❌ Failed to generate Sparkle signature"
+            echo "Signature output: $SIGNATURE"
+            exit 1
+          fi
+          
+          echo "✅ Signature generated: ${SIGNATURE:0:20}..."
           echo "signature=$SIGNATURE" >> $GITHUB_OUTPUT
           
           # Get file size
           FILE_SIZE=$(stat -f%z "GitPeek-${{ github.ref_name }}.dmg")
+          if [ -z "$FILE_SIZE" ]; then
+            echo "❌ Failed to get DMG file size"
+            exit 1
+          fi
+          
+          echo "📏 File size: $FILE_SIZE bytes"
           echo "file_size=$FILE_SIZE" >> $GITHUB_OUTPUT
           
       - name: Update appcast.xml
