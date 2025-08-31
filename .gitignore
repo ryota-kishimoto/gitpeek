@@ -107,6 +107,11 @@ default.profraw
 *.mobileprovision
 *.provisionprofile
 
+# Sparkle signing keys
+sparkle_ed25519_key.sec
+*.sec
+~/.sparkle/
+
 # Logs
 *.log
 

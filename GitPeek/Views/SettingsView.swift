@@ -1,4 +1,5 @@
 import SwiftUI
+import Sparkle
 
 struct SettingsView: View {
     @AppStorage("refreshInterval") private var refreshInterval: Double = 30.0
@@ -209,6 +210,14 @@ struct AboutView: View {
             }
             
             Spacer()
+            
+            // Auto-update check button
+            if let appDelegate = NSApp.delegate as? AppDelegate {
+                Button("Check for Updates...") {
+                    appDelegate.updaterController.updater.checkForUpdates()
+                }
+                .padding(.bottom, 8)
+            }
             
             Text("© 2025 GitPeek. All rights reserved.")
                 .font(.caption)

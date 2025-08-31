@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>GitPeek Updates</title>
+        <link>https://raw.githubusercontent.com/ryota-kishimoto/gitpeek/main/appcast.xml</link>
+        <description>Most recent changes with updates</description>
+        <language>en</language>
+        
+        <!-- Example release item (update this when releasing new versions) -->
+        <!--
+        <item>
+            <title>Version 1.3.0</title>
+            <description><![CDATA[
+                <h2>New Features</h2>
+                <ul>
+                    <li>Auto-update functionality via Sparkle</li>
+                    <li>Improved performance</li>
+                </ul>
+                <h2>Bug Fixes</h2>
+                <ul>
+                    <li>Fixed Cursor integration</li>
+                </ul>
+            ]]></description>
+            <pubDate>Sat, 31 Aug 2025 12:00:00 +0900</pubDate>
+            <sparkle:version>1.3.0</sparkle:version>
+            <sparkle:shortVersionString>1.3.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <enclosure 
+                url="https://github.com/ryota-kishimoto/gitpeek/releases/download/v1.3.0/GitPeek-1.3.0.dmg"
+                sparkle:edSignature="YOUR_SIGNATURE_HERE"
+                length="FILE_SIZE_IN_BYTES"
+                type="application/octet-stream" />
+        </item>
+        -->
+        
+    </channel>
+</rss>

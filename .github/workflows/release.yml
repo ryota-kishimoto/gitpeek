@@ -76,6 +76,14 @@ jobs:
     <true/>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>SUFeedURL</key>
+    <string>https://raw.githubusercontent.com/ryota-kishimoto/gitpeek/main/appcast.xml</string>
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
+    <key>SUScheduledCheckInterval</key>
+    <integer>86400</integer>
+    <key>SUPublicEDKey</key>
+    <string>VuF1RDfpkALoNuceWkjdqQC8tKsTRcPEBgWnD1iIkOY=</string>
 </dict>
 </plist>
 PLIST_EOF
@@ -106,6 +114,67 @@ PLIST_EOF
             
           # Generate SHA256
           shasum -a 256 GitPeek-${{ github.ref_name }}.dmg > GitPeek-${{ github.ref_name }}.dmg.sha256
+          
+      - name: Download and Setup Sparkle
+        run: |
+          curl -L https://github.com/sparkle-project/Sparkle/releases/latest/download/Sparkle-2.7.1.tar.xz -o Sparkle.tar.xz
+          tar -xf Sparkle.tar.xz
+          
+      - name: Sign DMG with Sparkle
+        id: sparkle_sign
+        run: |
+          # Sign the DMG
+          SIGNATURE=$(./bin/sign_update -s "${{ secrets.SPARKLE_PRIVATE_KEY }}" "GitPeek-${{ github.ref_name }}.dmg" 2>&1 | tail -1)
+          echo "signature=$SIGNATURE" >> $GITHUB_OUTPUT
+          
+          # Get file size
+          FILE_SIZE=$(stat -f%z "GitPeek-${{ github.ref_name }}.dmg")
+          echo "file_size=$FILE_SIZE" >> $GITHUB_OUTPUT
+          
+      - name: Update appcast.xml
+        run: |
+          # Checkout with write permissions
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Create appcast entry
+          VERSION="${{ github.ref_name }}"
+          SIGNATURE="${{ steps.sparkle_sign.outputs.signature }}"
+          FILE_SIZE="${{ steps.sparkle_sign.outputs.file_size }}"
+          
+          # Create new appcast entry
+          cat > new_item.xml << EOF
+        <item>
+            <title>Version ${VERSION#v}</title>
+            <description><![CDATA[
+                <h2>What's New</h2>
+                <p>See release notes on GitHub</p>
+            ]]></description>
+            <pubDate>$(date -R)</pubDate>
+            <sparkle:version>${VERSION#v}</sparkle:version>
+            <sparkle:shortVersionString>${VERSION#v}</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <enclosure 
+                url="https://github.com/ryota-kishimoto/gitpeek/releases/download/${VERSION}/GitPeek-${VERSION}.dmg"
+                sparkle:edSignature="${SIGNATURE}"
+                length="${FILE_SIZE}"
+                type="application/octet-stream" />
+        </item>
+  EOF
+          
+          # Insert new item into appcast.xml (before </channel>)
+          if [ -f appcast.xml ]; then
+            # Remove existing item for this version if it exists
+            sed -i.bak "/<item>.*Version ${VERSION#v}/,/<\/item>/d" appcast.xml
+            
+            # Insert new item before </channel>
+            sed -i.bak '/<\/channel>/e cat new_item.xml' appcast.xml
+          fi
+          
+          # Commit and push appcast.xml
+          git add appcast.xml
+          git commit -m "chore: update appcast.xml for ${VERSION}" || echo "No changes to commit"
+          git push origin main || echo "Failed to push - may need manual update"
           
       - name: Generate Release Notes
         id: release_notes

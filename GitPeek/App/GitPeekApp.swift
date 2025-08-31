@@ -1,4 +1,5 @@
 import SwiftUI
+import Sparkle
 
 @main
 struct GitPeekApp: App {
@@ -8,6 +9,11 @@ struct GitPeekApp: App {
         Settings {
             EmptyView()
         }
+        .commands {
+            CommandGroup(after: .appInfo) {
+                CheckForUpdatesView(updater: appDelegate.updaterController.updater)
+            }
+        }
     }
 }
 
@@ -15,6 +21,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var popover = NSPopover()
     private var eventMonitor: Any?
+    
+    // Sparkle updater controller
+    lazy var updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: nil,
+        userDriverDelegate: nil
+    )
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupMenuBar()

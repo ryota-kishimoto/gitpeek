@@ -12,11 +12,15 @@ let package = Package(
             targets: ["GitPeek"]
         )
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.6.0")
+    ],
     targets: [
         .executableTarget(
             name: "GitPeek",
-            dependencies: [],
+            dependencies: [
+                .product(name: "Sparkle", package: "Sparkle")
+            ],
             path: "GitPeek",
             exclude: ["Assets.xcassets", "GitPeek.entitlements"]
         ),
