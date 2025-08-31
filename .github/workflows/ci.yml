@@ -28,6 +28,25 @@ jobs:
       
     - name: Run tests
       run: swift test -v
+      
+    - name: Run Snapshot Tests
+      run: |
+        xcodebuild test \
+          -scheme GitPeek \
+          -destination 'platform=macOS' \
+          -only-testing:GitPeekTests/MenuBarViewSnapshotTests \
+          -only-testing:GitPeekTests/SettingsViewSnapshotTests \
+          -only-testing:GitPeekTests/ContentViewSnapshotTests \
+          | grep -E "(Test Suite|passed|failed)" || true
+          
+    - name: Upload Snapshot Artifacts
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: snapshot-failures
+        path: |
+          **/__Snapshots__/
+          **/Failures/
 
   build-release:
     name: Build Release

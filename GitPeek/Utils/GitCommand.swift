@@ -272,7 +272,7 @@ final class GitCommand {
         }
     }
     
-    private func parseGitStatusOutput(_ output: String) -> GitStatus {
+    internal func parseGitStatusOutput(_ output: String) -> GitStatus {
         var staged: [String] = []
         var modified: [String] = []
         var untracked: [String] = []

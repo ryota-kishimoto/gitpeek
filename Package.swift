@@ -13,7 +13,8 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.6.0")
+        .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.6.0"),
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.15.0")
     ],
     targets: [
         .executableTarget(
@@ -28,7 +29,8 @@ let package = Package(
             name: "GitPeekTests",
             dependencies: [
                 "GitPeek",
-                .product(name: "Sparkle", package: "Sparkle")
+                .product(name: "Sparkle", package: "Sparkle"),
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing")
             ],
             path: "GitPeekTests"
         )
