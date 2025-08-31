@@ -204,10 +204,11 @@ jobs:
           # Insert new item into appcast.xml (before </channel>)
           if [ -f appcast.xml ]; then
             # Remove existing item for this version if it exists
-            sed -i.bak "/<item>.*Version ${VERSION#v}/,/<\/item>/d" appcast.xml
+            sed -i.bak "/<item>.*Version \${VERSION#v}/,/<\/item>/d" appcast.xml
             
             # Insert new item before </channel>
-            sed -i.bak '/<\/channel>/e cat new_item.xml' appcast.xml
+            awk '/<\/channel>/ { while (getline line < "new_item.xml") print line } 1' appcast.xml > appcast.xml.tmp
+            mv appcast.xml.tmp appcast.xml
           fi
           
           # Commit and push appcast.xml
