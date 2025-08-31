@@ -126,7 +126,10 @@ final class ExternalAppIntegrationTests: XCTestCase {
     
     func testGitHubURLConversion() {
         // Test SSH to HTTPS conversion
-        var repo = testRepository!
+        guard var repo = testRepository else {
+            XCTFail("Test repository not initialized")
+            return
+        }
         
         // Test SSH format
         repo.updateRemoteURL("git@github.com:user/repo.git")
