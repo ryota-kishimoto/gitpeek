@@ -34,9 +34,7 @@ jobs:
         xcodebuild test \
           -scheme GitPeek \
           -destination 'platform=macOS' \
-          -only-testing:GitPeekTests/MenuBarViewSnapshotTests \
-          -only-testing:GitPeekTests/SettingsViewSnapshotTests \
-          -only-testing:GitPeekTests/ContentViewSnapshotTests \
+          -only-testing:GitPeekTests/ViewSnapshotTests \
           | grep -E "(Test Suite|passed|failed)" || true
           
     - name: Upload Snapshot Artifacts

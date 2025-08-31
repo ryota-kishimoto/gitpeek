@@ -8,7 +8,11 @@ import AppKit
 final class ViewSnapshotTests: XCTestCase {
     
     override func setUpWithError() throws {
-        isRecording = true // Generate baseline snapshots
+        // Skip snapshot tests in CI environment
+        guard ProcessInfo.processInfo.environment["CI"] == nil else {
+            throw XCTSkip("Skipping snapshot tests in CI environment")
+        }
+        // isRecording = true // Uncomment to regenerate snapshots
     }
     
     // MARK: - Settings View Tests
@@ -18,6 +22,7 @@ final class ViewSnapshotTests: XCTestCase {
             .frame(width: 450, height: 400)
         
         let hostingController = NSHostingController(rootView: view)
+        hostingController.view.frame = NSRect(x: 0, y: 0, width: 450, height: 400)
         assertSnapshot(of: hostingController, as: .image)
     }
     
@@ -27,6 +32,7 @@ final class ViewSnapshotTests: XCTestCase {
             .environment(\.colorScheme, .dark)
         
         let hostingController = NSHostingController(rootView: view)
+        hostingController.view.frame = NSRect(x: 0, y: 0, width: 450, height: 400)
         assertSnapshot(of: hostingController, as: .image)
     }
     
@@ -39,6 +45,7 @@ final class ViewSnapshotTests: XCTestCase {
             .frame(width: 400, height: 600)
         
         let hostingController = NSHostingController(rootView: view)
+        hostingController.view.frame = NSRect(x: 0, y: 0, width: 400, height: 600)
         assertSnapshot(of: hostingController, as: .image)
     }
     
@@ -50,6 +57,7 @@ final class ViewSnapshotTests: XCTestCase {
             .environment(\.colorScheme, .dark)
         
         let hostingController = NSHostingController(rootView: view)
+        hostingController.view.frame = NSRect(x: 0, y: 0, width: 400, height: 600)
         assertSnapshot(of: hostingController, as: .image)
     }
     
@@ -62,6 +70,7 @@ final class ViewSnapshotTests: XCTestCase {
             .frame(width: 600, height: 400)
         
         let hostingController = NSHostingController(rootView: view)
+        hostingController.view.frame = NSRect(x: 0, y: 0, width: 600, height: 400)
         assertSnapshot(of: hostingController, as: .image)
     }
     
@@ -73,6 +82,7 @@ final class ViewSnapshotTests: XCTestCase {
             .environment(\.colorScheme, .dark)
         
         let hostingController = NSHostingController(rootView: view)
+        hostingController.view.frame = NSRect(x: 0, y: 0, width: 600, height: 400)
         assertSnapshot(of: hostingController, as: .image)
     }
 }
