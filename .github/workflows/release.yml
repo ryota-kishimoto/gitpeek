@@ -58,9 +58,20 @@ jobs:
           # Create app bundle structure
           mkdir -p "GitPeek.app/Contents/MacOS"
           mkdir -p "GitPeek.app/Contents/Resources"
+          mkdir -p "GitPeek.app/Contents/Frameworks"
           
           # Copy executable
           cp "$EXECUTABLE_PATH" "GitPeek.app/Contents/MacOS/GitPeek"
+          
+          # Copy Sparkle framework
+          if [ -d "build/Build/Products/Release/Sparkle.framework" ]; then
+            echo "📦 Copying Sparkle framework..."
+            cp -R "build/Build/Products/Release/Sparkle.framework" "GitPeek.app/Contents/Frameworks/"
+          else
+            echo "⚠️ Sparkle framework not found, checking alternative locations..."
+            # Try to find Sparkle in build directory
+            find build -name "Sparkle.framework" -type d | head -1 | xargs -I {} cp -R {} "GitPeek.app/Contents/Frameworks/"
+          fi
           
           # Create Info.plist
           VERSION="${{ github.ref_name }}"
