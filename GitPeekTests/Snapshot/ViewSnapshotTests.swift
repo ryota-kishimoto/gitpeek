@@ -10,9 +10,9 @@ final class ViewSnapshotTests: XCTestCase {
     override func setUpWithError() throws {
         // Enable recording mode in CI to generate baseline snapshots
         if ProcessInfo.processInfo.environment["CI"] != nil {
-            isRecording = true
+            // isRecording = true
         }
-        // isRecording = true // Uncomment to regenerate snapshots locally
+        // // isRecording = true // Uncomment to regenerate snapshots locally
     }
     
     // MARK: - Settings View Tests
