@@ -64,43 +64,43 @@ jobs:
           # Create Info.plist
           VERSION="${{ github.ref_name }}"
           cat > "GitPeek.app/Contents/Info.plist" << PLIST_EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleExecutable</key>
-    <string>GitPeek</string>
-    <key>CFBundleIconFile</key>
-    <string>AppIcon</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.gitpeek.GitPeek</string>
-    <key>CFBundleName</key>
-    <string>GitPeek</string>
-    <key>CFBundleDisplayName</key>
-    <string>GitPeek</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleShortVersionString</key>
-    <string>${VERSION}</string>
-    <key>CFBundleVersion</key>
-    <string>1</string>
-    <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
-    <key>LSUIElement</key>
-    <true/>
-    <key>NSHighResolutionCapable</key>
-    <true/>
-    <key>SUFeedURL</key>
-    <string>https://raw.githubusercontent.com/ryota-kishimoto/gitpeek/main/appcast.xml</string>
-    <key>SUEnableAutomaticChecks</key>
-    <true/>
-    <key>SUScheduledCheckInterval</key>
-    <integer>86400</integer>
-    <key>SUPublicEDKey</key>
-    <string>VuF1RDfpkALoNuceWkjdqQC8tKsTRcPEBgWnD1iIkOY=</string>
-</dict>
-</plist>
-PLIST_EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>GitPeek</string>
+              <key>CFBundleIconFile</key>
+              <string>AppIcon</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.gitpeek.GitPeek</string>
+              <key>CFBundleName</key>
+              <string>GitPeek</string>
+              <key>CFBundleDisplayName</key>
+              <string>GitPeek</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>CFBundleShortVersionString</key>
+              <string>${VERSION}</string>
+              <key>CFBundleVersion</key>
+              <string>1</string>
+              <key>LSMinimumSystemVersion</key>
+              <string>13.0</string>
+              <key>LSUIElement</key>
+              <true/>
+              <key>NSHighResolutionCapable</key>
+              <true/>
+              <key>SUFeedURL</key>
+              <string>https://raw.githubusercontent.com/ryota-kishimoto/gitpeek/main/appcast.xml</string>
+              <key>SUEnableAutomaticChecks</key>
+              <true/>
+              <key>SUScheduledCheckInterval</key>
+              <integer>86400</integer>
+              <key>SUPublicEDKey</key>
+              <string>VuF1RDfpkALoNuceWkjdqQC8tKsTRcPEBgWnD1iIkOY=</string>
+          </dict>
+          </plist>
+          PLIST_EOF
           
           # Make executable
           chmod +x "GitPeek.app/Contents/MacOS/GitPeek"
@@ -182,23 +182,23 @@ PLIST_EOF
           
           # Create new appcast entry
           cat > new_item.xml << EOF
-        <item>
-            <title>Version ${VERSION#v}</title>
-            <description><![CDATA[
-                <h2>What's New</h2>
-                <p>See release notes on GitHub</p>
-            ]]></description>
-            <pubDate>$(date -R)</pubDate>
-            <sparkle:version>${VERSION#v}</sparkle:version>
-            <sparkle:shortVersionString>${VERSION#v}</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-            <enclosure 
-                url="https://github.com/ryota-kishimoto/gitpeek/releases/download/${VERSION}/GitPeek-${VERSION}.dmg"
-                sparkle:edSignature="${SIGNATURE}"
-                length="${FILE_SIZE}"
-                type="application/octet-stream" />
-        </item>
-  EOF
+          <item>
+              <title>Version \${VERSION#v}</title>
+              <description><![CDATA[
+                  <h2>What's New</h2>
+                  <p>See release notes on GitHub</p>
+              ]]></description>
+              <pubDate>\$(date -R)</pubDate>
+              <sparkle:version>\${VERSION#v}</sparkle:version>
+              <sparkle:shortVersionString>\${VERSION#v}</sparkle:shortVersionString>
+              <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+              <enclosure 
+                  url="https://github.com/ryota-kishimoto/gitpeek/releases/download/\${VERSION}/GitPeek-\${VERSION}.dmg"
+                  sparkle:edSignature="\${SIGNATURE}"
+                  length="\${FILE_SIZE}"
+                  type="application/octet-stream" />
+          </item>
+          EOF
           
           # Insert new item into appcast.xml (before </channel>)
           if [ -f appcast.xml ]; then
