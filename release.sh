@@ -131,7 +131,7 @@ Thanks to all users for their feedback and patience while we improved GitPeek!
 
 ---
 
-**Full Changelog**: https://github.com/gitpeek/gitpeek/compare/v1.0.0...v1.2.0
+**Full Changelog**: https://github.com/ryota-kishimoto/gitpeek/compare/v1.0.0...v1.2.0
 EOF
 fi
 
@@ -153,7 +153,7 @@ echo ""
 echo "✅ Release draft created successfully!"
 echo ""
 echo "📍 Next steps:"
-echo "1. Review the draft release at: https://github.com/gitpeek/gitpeek/releases"
+echo "1. Review the draft release at: https://github.com/ryota-kishimoto/gitpeek/releases"
 echo "2. Edit release notes if needed"
 echo "3. Publish the release when ready"
 echo ""

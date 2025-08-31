@@ -11,7 +11,7 @@ macOSのメニューバーでGitリポジトリを管理するアプリ
 
 ## インストール
 
-[最新版をダウンロード](https://github.com/gitpeek/gitpeek/releases)してApplicationsフォルダにドラッグ
+[最新版をダウンロード](https://github.com/ryota-kishimoto/gitpeek/releases)してApplicationsフォルダにドラッグ
 
 ## 使い方
 

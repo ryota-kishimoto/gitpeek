@@ -81,4 +81,4 @@ Thanks to all users for their feedback and patience while we improved GitPeek!
 
 ---
 
-**Full Changelog**: https://github.com/gitpeek/gitpeek/compare/v1.0.0...v1.2.0
+**Full Changelog**: https://github.com/ryota-kishimoto/gitpeek/compare/v1.0.0...v1.2.0
