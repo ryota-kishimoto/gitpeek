@@ -8,11 +8,11 @@ import AppKit
 final class ViewSnapshotTests: XCTestCase {
     
     override func setUpWithError() throws {
-        // Skip snapshot tests in CI environment
-        guard ProcessInfo.processInfo.environment["CI"] == nil else {
-            throw XCTSkip("Skipping snapshot tests in CI environment")
+        // Enable recording mode in CI to generate baseline snapshots
+        if ProcessInfo.processInfo.environment["CI"] != nil {
+            isRecording = true
         }
-        // isRecording = true // Uncomment to regenerate snapshots
+        // isRecording = true // Uncomment to regenerate snapshots locally
     }
     
     // MARK: - Settings View Tests
@@ -23,6 +23,9 @@ final class ViewSnapshotTests: XCTestCase {
         
         let hostingController = NSHostingController(rootView: view)
         hostingController.view.frame = NSRect(x: 0, y: 0, width: 450, height: 400)
+        hostingController.view.needsLayout = true
+        hostingController.view.layoutSubtreeIfNeeded()
+        
         assertSnapshot(of: hostingController, as: .image)
     }
     
@@ -33,6 +36,9 @@ final class ViewSnapshotTests: XCTestCase {
         
         let hostingController = NSHostingController(rootView: view)
         hostingController.view.frame = NSRect(x: 0, y: 0, width: 450, height: 400)
+        hostingController.view.needsLayout = true
+        hostingController.view.layoutSubtreeIfNeeded()
+        
         assertSnapshot(of: hostingController, as: .image)
     }
     
@@ -46,6 +52,9 @@ final class ViewSnapshotTests: XCTestCase {
         
         let hostingController = NSHostingController(rootView: view)
         hostingController.view.frame = NSRect(x: 0, y: 0, width: 400, height: 600)
+        hostingController.view.needsLayout = true
+        hostingController.view.layoutSubtreeIfNeeded()
+        
         assertSnapshot(of: hostingController, as: .image)
     }
     
@@ -58,6 +67,9 @@ final class ViewSnapshotTests: XCTestCase {
         
         let hostingController = NSHostingController(rootView: view)
         hostingController.view.frame = NSRect(x: 0, y: 0, width: 400, height: 600)
+        hostingController.view.needsLayout = true
+        hostingController.view.layoutSubtreeIfNeeded()
+        
         assertSnapshot(of: hostingController, as: .image)
     }
     
@@ -71,6 +83,9 @@ final class ViewSnapshotTests: XCTestCase {
         
         let hostingController = NSHostingController(rootView: view)
         hostingController.view.frame = NSRect(x: 0, y: 0, width: 600, height: 400)
+        hostingController.view.needsLayout = true
+        hostingController.view.layoutSubtreeIfNeeded()
+        
         assertSnapshot(of: hostingController, as: .image)
     }
     
@@ -83,6 +98,9 @@ final class ViewSnapshotTests: XCTestCase {
         
         let hostingController = NSHostingController(rootView: view)
         hostingController.view.frame = NSRect(x: 0, y: 0, width: 600, height: 400)
+        hostingController.view.needsLayout = true
+        hostingController.view.layoutSubtreeIfNeeded()
+        
         assertSnapshot(of: hostingController, as: .image)
     }
 }
