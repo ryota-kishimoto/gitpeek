@@ -3,7 +3,8 @@ import Sparkle
 
 @main
 struct GitPeekApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @NSApplicationDelegateAdaptor(AppDelegate.self)
+    var appDelegate
     
     var body: some Scene {
         Settings {
@@ -11,7 +12,9 @@ struct GitPeekApp: App {
         }
         .commands {
             CommandGroup(after: .appInfo) {
-                CheckForUpdatesView(updater: appDelegate.updaterController.updater)
+                Button("Check for Updates...") {
+                    appDelegate.updaterController.updater.checkForUpdates()
+                }
             }
         }
     }
@@ -50,7 +53,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc private func togglePopover() {
-        guard let button = statusItem?.button else { return }
+        guard let button = statusItem?.button else {
+            return
+        }
         
         if popover.isShown {
             closePopover()
