@@ -30,7 +30,7 @@ jobs:
           xcode-version: latest-stable
           
       - name: Cache Swift Package Manager
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/Library/Developer/Xcode/DerivedData
