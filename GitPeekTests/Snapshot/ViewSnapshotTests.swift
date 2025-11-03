@@ -8,11 +8,19 @@ import AppKit
 final class ViewSnapshotTests: XCTestCase {
     
     override func setUpWithError() throws {
-        // Enable recording mode in CI to generate baseline snapshots
-        if ProcessInfo.processInfo.environment["CI"] != nil {
-            // isRecording = true
+        // Automatically set isRecording based on environment or command line
+        isRecording = shouldRecordSnapshots()
+    }
+    
+    private func shouldRecordSnapshots() -> Bool {
+        // Check for explicit recording environment variable
+        if let recordEnv = ProcessInfo.processInfo.environment["RECORD_SNAPSHOTS"],
+           recordEnv.lowercased() == "true" {
+            return true
         }
-        // // isRecording = true // Uncomment to regenerate snapshots locally
+        
+        // Default to comparison mode (false)
+        return false
     }
     
     // MARK: - Settings View Tests

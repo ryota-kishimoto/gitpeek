@@ -50,9 +50,7 @@ jobs:
           xcodebuild test \
             -scheme GitPeek \
             -destination 'platform=macOS' \
-            -only-testing:GitPeekTests/MenuBarViewSnapshotTests \
-            -only-testing:GitPeekTests/SettingsViewSnapshotTests \
-            -only-testing:GitPeekTests/ContentViewSnapshotTests \
+            -only-testing:GitPeekTests/ViewSnapshotTests \
             -resultBundlePath TestResults.xcresult \
             | xcpretty --test
             
@@ -125,13 +123,13 @@ jobs:
           
       - name: Generate Base Snapshots
         working-directory: base
+        env:
+          RECORD_SNAPSHOTS: "true"
         run: |
           xcodebuild test \
             -scheme GitPeek \
             -destination 'platform=macOS' \
-            -only-testing:GitPeekTests/MenuBarViewSnapshotTests \
-            -only-testing:GitPeekTests/SettingsViewSnapshotTests \
-            -only-testing:GitPeekTests/ContentViewSnapshotTests \
+            -only-testing:GitPeekTests/ViewSnapshotTests \
             | xcpretty --test || true
             
       - name: Compare Snapshots

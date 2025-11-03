@@ -29,17 +29,17 @@ jobs:
     - name: Run tests (excluding snapshots)
       run: swift test -v --skip ViewSnapshotTests
       
-    - name: Run Snapshot Tests (generate baselines)
+    - name: Run Snapshot Tests (compare against baselines)
       run: |
         # Ensure Xcode is properly selected for xcodebuild
         sudo xcode-select -s /Applications/Xcode_15.0.1.app
-        echo "🎨 Running snapshot tests to generate baseline images..."
+        echo "🔍 Running snapshot tests to detect visual regressions..."
         xcodebuild test \
           -scheme GitPeek \
           -destination 'platform=macOS' \
           -only-testing:GitPeekTests/ViewSnapshotTests \
-          | grep -E "(Test Suite|passed|failed|Automatically recorded)" || true
-        echo "✅ Snapshot baseline generation completed"
+          | grep -E "(Test Suite|passed|failed)"
+        echo "✅ Visual regression testing completed"
           
     - name: Upload Snapshot Artifacts
       if: failure()
