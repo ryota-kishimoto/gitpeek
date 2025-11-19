@@ -4,9 +4,11 @@ struct MenuBarView: View {
     @StateObject private var viewModel = MenuBarViewModel()
     @State private var showingSettings = false
     let closePopover: (() -> Void)?
-    
-    init(closePopover: (() -> Void)? = nil) {
+    let openPopover: (() -> Void)?
+
+    init(closePopover: (() -> Void)? = nil, openPopover: (() -> Void)? = nil) {
         self.closePopover = closePopover
+        self.openPopover = openPopover
     }
     
     var body: some View {
@@ -101,7 +103,12 @@ struct MenuBarView: View {
             Button("Add Repository") {
                 closePopover?()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    viewModel.selectRepositoryFolder()
+                    viewModel.selectRepositoryFolder {
+                        // Reopen popover after repository is added
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            openPopover?()
+                        }
+                    }
                 }
             }
         }
@@ -158,7 +165,12 @@ struct MenuBarView: View {
             Button {
                 closePopover?()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    viewModel.selectRepositoryFolder()
+                    viewModel.selectRepositoryFolder {
+                        // Reopen popover after repository is added
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            openPopover?()
+                        }
+                    }
                 }
             } label: {
                 Label("Add Repository", systemImage: "plus")

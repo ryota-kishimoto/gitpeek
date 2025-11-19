@@ -44,9 +44,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.action = #selector(togglePopover)
         }
         
-        let menuBarView = MenuBarView(closePopover: { [weak self] in
-            self?.closePopover()
-        })
+        let menuBarView = MenuBarView(
+            closePopover: { [weak self] in
+                self?.closePopover()
+            },
+            openPopover: { [weak self] in
+                self?.openPopover()
+            }
+        )
         popover.contentViewController = NSHostingController(rootView: menuBarView)
         popover.behavior = .applicationDefined  // 完全に手動制御
         popover.animates = true
@@ -67,6 +72,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    private func openPopover() {
+        guard let button = statusItem?.button else { return }
+        if !popover.isShown {
+            NotificationCenter.default.post(name: NSNotification.Name("PopoverWillShow"), object: nil)
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            startEventMonitor()
+        }
+    }
+
     private func closePopover() {
         popover.performClose(nil)
         stopEventMonitor()

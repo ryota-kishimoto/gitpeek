@@ -79,7 +79,7 @@ final class MenuBarViewModel: ObservableObject {
         }
     }
     
-    func selectRepositoryFolder() {
+    func selectRepositoryFolder(onComplete: (() -> Void)? = nil) {
         let openPanel = NSOpenPanel()
         openPanel.title = "Select Git Repository"
         openPanel.message = "Choose a Git repository folder to add to GitPeek"
@@ -100,10 +100,17 @@ final class MenuBarViewModel: ObservableObject {
             Task { @MainActor in
                 do {
                     try await self.addRepository(path: url.path)
+                    // Notify completion
+                    onComplete?()
                 } catch {
                     self.errorMessage = error.localizedDescription
+                    // Still call onComplete even on error
+                    onComplete?()
                 }
             }
+        } else {
+            // User cancelled - still call onComplete
+            onComplete?()
         }
     }
     
