@@ -12,21 +12,21 @@ struct MenuBarView: View {
     var body: some View {
         VStack(spacing: 0) {
             headerView
-            
+
             Divider()
-            
+
             if viewModel.repositories.isEmpty {
                 emptyStateView
             } else {
                 repositoryListView
             }
-            
+
             Divider()
-            
+
             footerView
         }
         .frame(width: 350, height: 450)
-        .background(AppTheme.primaryBackground)
+        .background(VisualEffectView(material: .menu, blendingMode: .behindWindow))
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("OK") {
                 viewModel.errorMessage = nil
@@ -51,17 +51,18 @@ struct MenuBarView: View {
             Image(systemName: "folder.badge.gearshape")
                 .font(.title2)
                 .foregroundColor(.accentColor)
-            
+
             VStack(alignment: .leading, spacing: 0) {
                 Text("GitPeek")
                     .font(.headline)
+                    .foregroundColor(AppTheme.primaryText)
                 Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")")
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppTheme.secondaryText)
             }
-            
+
             Spacer()
-            
+
             if viewModel.isRefreshing {
                 ProgressView()
                     .scaleEffect(0.7)
@@ -72,6 +73,7 @@ struct MenuBarView: View {
                     }
                 } label: {
                     Image(systemName: "arrow.clockwise")
+                        .foregroundColor(AppTheme.primaryText)
                 }
                 .buttonStyle(.plain)
             }
@@ -86,15 +88,16 @@ struct MenuBarView: View {
         VStack(spacing: 16) {
             Image(systemName: "folder.badge.plus")
                 .font(.system(size: 48))
-                .foregroundColor(.secondary)
-            
+                .foregroundColor(AppTheme.secondaryText)
+
             Text("No repositories added")
                 .font(.headline)
-            
+                .foregroundColor(AppTheme.primaryText)
+
             Text("Add a Git repository to get started")
                 .font(.caption)
-                .foregroundColor(.secondary)
-            
+                .foregroundColor(AppTheme.secondaryText)
+
             Button("Add Repository") {
                 closePopover?()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -159,22 +162,25 @@ struct MenuBarView: View {
                 }
             } label: {
                 Label("Add Repository", systemImage: "plus")
+                    .foregroundColor(AppTheme.primaryText)
             }
             .buttonStyle(.plain)
-            
+
             Spacer()
-            
+
             Button {
                 showingSettings = true
             } label: {
                 Image(systemName: "gearshape")
+                    .foregroundColor(AppTheme.primaryText)
             }
             .buttonStyle(.plain)
-            
+
             Button {
                 NSApplication.shared.terminate(nil)
             } label: {
                 Image(systemName: "power")
+                    .foregroundColor(AppTheme.primaryText)
             }
             .buttonStyle(.plain)
         }
@@ -210,6 +216,7 @@ struct RepositoryRowView: View {
                     
                     Text(repository.name)
                         .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(AppTheme.primaryText)
                     
                     if repository.isWorktree == true {
                         Image(systemName: "arrow.triangle.branch")
@@ -221,6 +228,7 @@ struct RepositoryRowView: View {
                         HStack(spacing: 4) {
                             Text(branch)
                                 .font(.system(size: 11))
+                                .foregroundColor(AppTheme.primaryText)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(AppTheme.branchTagBackground)

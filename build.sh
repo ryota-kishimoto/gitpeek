@@ -19,9 +19,20 @@ swift build -c release --arch arm64 --arch x86_64
 echo "📱 Creating app bundle..."
 mkdir -p GitPeek.app/Contents/MacOS
 mkdir -p GitPeek.app/Contents/Resources
+mkdir -p GitPeek.app/Contents/Frameworks
 
 # Copy executable
 cp .build/apple/Products/Release/GitPeek GitPeek.app/Contents/MacOS/
+
+# Copy Sparkle framework
+echo "📦 Copying Sparkle framework..."
+if [ -d ".build/apple/Products/Release/Sparkle.framework" ]; then
+    cp -R .build/apple/Products/Release/Sparkle.framework GitPeek.app/Contents/Frameworks/
+fi
+
+# Fix rpath for Sparkle framework
+echo "🔧 Fixing rpath..."
+install_name_tool -add_rpath "@executable_path/../Frameworks" GitPeek.app/Contents/MacOS/GitPeek 2>/dev/null || true
 
 # Get version from source Info.plist  
 VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "GitPeek/Info.plist" 2>/dev/null || echo "1.0.0")
@@ -52,6 +63,14 @@ cat > GitPeek.app/Contents/Info.plist << EOF
     <true/>
     <key>NSSupportsAutomaticTermination</key>
     <false/>
+    <key>SUFeedURL</key>
+    <string>https://raw.githubusercontent.com/ryota-kishimoto/gitpeek/main/appcast.xml</string>
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
+    <key>SUScheduledCheckInterval</key>
+    <integer>86400</integer>
+    <key>SUPublicEDKey</key>
+    <string>VuF1RDfpkALoNuceWkjdqQC8tKsTRcPEBgWnD1iIkOY=</string>
 </dict>
 </plist>
 EOF
