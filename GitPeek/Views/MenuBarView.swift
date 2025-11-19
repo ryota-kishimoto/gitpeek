@@ -322,9 +322,18 @@ struct RepositoryRowView: View {
                     .help("Open in Terminal")
                     
                     Menu {
-                        Button("Pull Changes", action: onPull)
-                            .disabled(repository.commitsBehind == 0 && repository.remoteURL == nil)
-                        
+                        if repository.isPulling {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.7)
+                                Text("Pulling...")
+                            }
+                            .disabled(true)
+                        } else {
+                            Button("Pull Changes", action: onPull)
+                                .disabled(repository.commitsBehind == 0 && repository.remoteURL == nil)
+                        }
+
                         Divider()
                         
                         Button("Open on GitHub", action: onOpenOnGitHub)
