@@ -99,7 +99,10 @@ struct MenuBarView: View {
                 .foregroundColor(AppTheme.secondaryText)
 
             Button("Add Repository") {
-                viewModel.selectRepositoryFolder()
+                closePopover?()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    viewModel.selectRepositoryFolder()
+                }
             }
         }
         .frame(maxHeight: .infinity)
@@ -153,7 +156,10 @@ struct MenuBarView: View {
     private var footerView: some View {
         HStack {
             Button {
-                viewModel.selectRepositoryFolder()
+                closePopover?()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    viewModel.selectRepositoryFolder()
+                }
             } label: {
                 Label("Add Repository", systemImage: "plus")
                     .foregroundColor(AppTheme.primaryText)
