@@ -30,34 +30,21 @@ final class RepositoryStore: ObservableObject {
         if repositories.contains(where: { $0.path == path }) {
             throw RepositoryError.alreadyExists
         }
-        
+
         // Validate it's a Git repository
         guard GitCommand.isValidRepository(at: path) else {
             throw RepositoryError.notAGitRepository
         }
-        
-        // Create and add repository
-        var repository = Repository(path: path)
-        
-        // Fetch initial status
-        do {
-            let status = try await gitCommand.getStatus(at: path)
-            let branch = try await gitCommand.getCurrentBranch(at: path)
-            let remoteURL = try await gitCommand.getRemoteURL(at: path)
-            let worktrees = try await gitCommand.getWorktrees(at: path)
-            let commitDiff = try await gitCommand.getCommitDifference(at: path)
-            
-            repository.updateStatus(status, branch: branch)
-            repository.updateRemoteURL(remoteURL)
-            repository.updateWorktrees(worktrees)
-            repository.updateCommitDifference(behind: commitDiff.behind, ahead: commitDiff.ahead)
-        } catch {
-            // Still add the repository even if initial fetch fails
-            print("Failed to fetch initial status: \(error)")
-        }
-        
+
+        // Create and add repository immediately (fast)
+        let repository = Repository(path: path)
         repositories.append(repository)
         save()
+
+        // Fetch status asynchronously in background (don't wait)
+        Task {
+            await self.updateRepository(repository.id)
+        }
     }
     
     /// Removes a repository
@@ -71,20 +58,25 @@ final class RepositoryStore: ObservableObject {
     /// - Parameter id: Repository ID to update
     func updateRepository(_ id: UUID) async {
         guard let index = repositories.firstIndex(where: { $0.id == id }) else { return }
-        
+
         let repository = repositories[index]
-        
+
         do {
-            let status = try await gitCommand.getStatus(at: repository.path)
-            let branch = try await gitCommand.getCurrentBranch(at: repository.path)
-            let remoteURL = try await gitCommand.getRemoteURL(at: repository.path)
-            let worktrees = try await gitCommand.getWorktrees(at: repository.path)
-            let commitDiff = try await gitCommand.getCommitDifference(at: repository.path)
-            
-            repositories[index].updateStatus(status, branch: branch)
-            repositories[index].updateRemoteURL(remoteURL)
-            repositories[index].updateWorktrees(worktrees)
-            repositories[index].updateCommitDifference(behind: commitDiff.behind, ahead: commitDiff.ahead)
+            // Run git commands in parallel for faster updates
+            async let status = gitCommand.getStatus(at: repository.path)
+            async let branch = gitCommand.getCurrentBranch(at: repository.path)
+            async let remoteURL = gitCommand.getRemoteURL(at: repository.path)
+            async let worktrees = gitCommand.getWorktrees(at: repository.path)
+            async let commitDiff = gitCommand.getCommitDifference(at: repository.path)
+
+            // Wait for all results
+            let (statusResult, branchResult, remoteURLResult, worktreesResult, commitDiffResult) =
+                try await (status, branch, remoteURL, worktrees, commitDiff)
+
+            repositories[index].updateStatus(statusResult, branch: branchResult)
+            repositories[index].updateRemoteURL(remoteURLResult)
+            repositories[index].updateWorktrees(worktreesResult)
+            repositories[index].updateCommitDifference(behind: commitDiffResult.behind, ahead: commitDiffResult.ahead)
         } catch {
             print("Failed to update repository \(repository.name): \(error)")
         }
@@ -110,13 +102,22 @@ final class RepositoryStore: ObservableObject {
     /// - Parameter id: Repository ID to pull
     /// - Returns: Pull result message
     func pullRepository(_ id: UUID) async throws -> String {
-        guard let repository = repositories.first(where: { $0.id == id }) else {
+        guard let index = repositories.firstIndex(where: { $0.id == id }) else {
             throw RepositoryError.notFound
         }
-        
-        let result = try await gitCommand.pull(at: repository.path)
-        await updateRepository(id)
-        return result
+
+        // Set pulling state
+        repositories[index].isPulling = true
+
+        do {
+            let result = try await gitCommand.pull(at: repositories[index].path)
+            await updateRepository(id)
+            repositories[index].isPulling = false
+            return result
+        } catch {
+            repositories[index].isPulling = false
+            throw error
+        }
     }
     
     /// Clears all repositories

@@ -33,6 +33,13 @@ struct Repository: Identifiable, Codable, Equatable {
     var mainWorktreePath: String?
     var commitsBehind: Int?
     var commitsAhead: Int?
+    var isPulling: Bool = false
+
+    enum CodingKeys: String, CodingKey {
+        case id, path, name, currentBranch, gitStatus, lastFetchedAt
+        case remoteURL, worktrees, isWorktree, mainWorktreePath
+        case commitsBehind, commitsAhead
+    }
     
     init(path: String, name: String? = nil, id: UUID = UUID()) {
         self.id = id
