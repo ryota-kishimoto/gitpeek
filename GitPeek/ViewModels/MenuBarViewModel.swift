@@ -89,15 +89,19 @@ final class MenuBarViewModel: ObservableObject {
         openPanel.canChooseDirectories = true
         openPanel.canCreateDirectories = false
         openPanel.allowsMultipleSelection = false
-        
-        openPanel.begin { response in
-            if response == .OK, let url = openPanel.url {
-                Task { @MainActor in
-                    do {
-                        try await self.addRepository(path: url.path)
-                    } catch {
-                        self.errorMessage = error.localizedDescription
-                    }
+
+        // Bring dialog to front
+        openPanel.level = .modalPanel
+        NSApp.activate(ignoringOtherApps: true)
+
+        // Use runModal for immediate display
+        let response = openPanel.runModal()
+        if response == .OK, let url = openPanel.url {
+            Task { @MainActor in
+                do {
+                    try await self.addRepository(path: url.path)
+                } catch {
+                    self.errorMessage = error.localizedDescription
                 }
             }
         }
