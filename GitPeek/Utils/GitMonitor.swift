@@ -58,28 +58,28 @@ final class GitMonitor: ObservableObject {
         isMonitoring = false
     }
     
-    /// Forces an immediate update of all repositories
+    /// Forces an immediate update of all repositories (with fetch)
     func forceUpdate() async {
-        await updateAllRepositories()
+        await updateAllRepositories(shouldFetch: true)
     }
-    
+
     /// Updates a specific repository
-    func updateRepository(_ repository: Repository) async {
+    func updateRepository(_ repository: Repository, shouldFetch: Bool = false) async {
         guard let store = repositoryStore else { return }
-        
+
         // Update only this specific repository through the store
-        await store.updateRepository(repository.id)
+        await store.updateRepository(repository.id, shouldFetch: shouldFetch)
     }
     
     // MARK: - Private Methods
-    
-    private func updateAllRepositories() async {
+
+    private func updateAllRepositories(shouldFetch: Bool = false) async {
         guard let store = repositoryStore else { return }
-        
-        print("[GitMonitor] Updating all repositories...")
+
+        print("[GitMonitor] Updating all repositories (fetch: \(shouldFetch))...")
         // Update all repositories directly via store
-        await store.updateAllRepositories()
-        
+        await store.updateAllRepositories(shouldFetch: shouldFetch)
+
         lastUpdateTime = Date()
         store.save()
         if let time = lastUpdateTime {
