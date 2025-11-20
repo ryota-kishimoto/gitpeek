@@ -132,14 +132,24 @@ final class GitCommand {
         }
     }
     
+    /// Fetches latest changes from remote without merging
+    /// - Parameter path: The path to the Git repository
+    /// - Throws: GitError if the operation fails
+    func fetch(at path: String) async throws {
+        try validateRepositoryPath(path)
+        _ = try await execute("git fetch --quiet", at: path, timeout: 30.0)
+    }
+
     /// Pulls changes from the remote repository
     /// - Parameter path: The path to the Git repository
     /// - Returns: The output of the pull command
     /// - Throws: GitError if the operation fails
     func pull(at path: String) async throws -> String {
         try validateRepositoryPath(path)
-        
-        let output = try await execute("git pull", at: path, timeout: 60.0)
+
+        // Use --ff-only to prevent unwanted merges (safest option)
+        // If fast-forward is not possible, it will fail with a clear message
+        let output = try await execute("git pull --ff-only", at: path, timeout: 60.0)
         return output.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
@@ -149,24 +159,21 @@ final class GitCommand {
     /// - Throws: GitError if the operation fails
     func getCommitDifference(at path: String) async throws -> (behind: Int, ahead: Int) {
         try validateRepositoryPath(path)
-        
-        // First, fetch to ensure we have latest remote info (without merging)
-        _ = try? await execute("git fetch --quiet", at: path, timeout: 30.0)
-        
-        // Get current branch
-        let branch = try await getCurrentBranch(at: path)
-        
+
+        // Don't fetch here - it's slow and done during refresh/pull operations
+        // This just reads the cached remote info
+
         // Check if upstream exists
         let upstreamExists = try? await execute("git rev-parse --abbrev-ref @{u}", at: path)
         guard upstreamExists != nil else {
             return (behind: 0, ahead: 0)
         }
-        
+
         // Get behind/ahead counts
         do {
             let output = try await execute("git rev-list --left-right --count HEAD...@{u}", at: path)
             let parts = output.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: "\t")
-            
+
             if parts.count == 2,
                let ahead = Int(parts[0]),
                let behind = Int(parts[1]) {
@@ -175,7 +182,7 @@ final class GitCommand {
         } catch {
             // If command fails, return zeros
         }
-        
+
         return (behind: 0, ahead: 0)
     }
     

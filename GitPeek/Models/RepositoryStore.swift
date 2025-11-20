@@ -56,13 +56,14 @@ final class RepositoryStore: ObservableObject {
     
     /// Updates the status of a repository
     /// - Parameter id: Repository ID to update
-    func updateRepository(_ id: UUID) async {
+    /// - Parameter shouldFetch: Whether to fetch from remote (default: false for speed)
+    func updateRepository(_ id: UUID, shouldFetch: Bool = false) async {
         guard let index = repositories.firstIndex(where: { $0.id == id }) else { return }
 
         let repository = repositories[index]
 
         do {
-            // Run git commands in parallel for faster updates
+            // Run fast local git commands in parallel
             async let status = gitCommand.getStatus(at: repository.path)
             async let branch = gitCommand.getCurrentBranch(at: repository.path)
             async let remoteURL = gitCommand.getRemoteURL(at: repository.path)
@@ -77,25 +78,43 @@ final class RepositoryStore: ObservableObject {
             repositories[index].updateRemoteURL(remoteURLResult)
             repositories[index].updateWorktrees(worktreesResult)
             repositories[index].updateCommitDifference(behind: commitDiffResult.behind, ahead: commitDiffResult.ahead)
+
+            // Optionally fetch in background (slow, but updates remote info)
+            if shouldFetch {
+                Task {
+                    try? await gitCommand.fetch(at: repository.path)
+                    // Re-check commit difference after fetch
+                    if let newCommitDiff = try? await gitCommand.getCommitDifference(at: repository.path) {
+                        await MainActor.run {
+                            if let currentIndex = repositories.firstIndex(where: { $0.id == id }) {
+                                repositories[currentIndex].updateCommitDifference(
+                                    behind: newCommitDiff.behind,
+                                    ahead: newCommitDiff.ahead
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         } catch {
             print("Failed to update repository \(repository.name): \(error)")
         }
     }
     
     /// Updates all repositories
-    func updateAll() async {
+    func updateAll(shouldFetch: Bool = false) async {
         await withTaskGroup(of: Void.self) { group in
             for repository in repositories {
                 group.addTask {
-                    await self.updateRepository(repository.id)
+                    await self.updateRepository(repository.id, shouldFetch: shouldFetch)
                 }
             }
         }
     }
-    
+
     /// Updates all repositories (alias for GitMonitor compatibility)
-    func updateAllRepositories() async {
-        await updateAll()
+    func updateAllRepositories(shouldFetch: Bool = false) async {
+        await updateAll(shouldFetch: shouldFetch)
     }
     
     /// Pulls changes for a repository
