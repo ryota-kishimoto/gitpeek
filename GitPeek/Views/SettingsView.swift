@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage("defaultEditor") private var defaultEditor: String = "Cursor"
     
     @State private var showingAbout = false
+    @State private var showingCacheCleared = false
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -150,6 +151,11 @@ struct SettingsView: View {
                 Button("Clear repository cache") {
                     clearCache()
                 }
+                .alert("Cache Cleared", isPresented: $showingCacheCleared) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text("Repository cache has been cleared. Repositories will be refreshed on next update.")
+                }
             } header: {
                 Text("Advanced Settings")
                     .font(.headline)
@@ -180,8 +186,16 @@ struct SettingsView: View {
     }
     
     private func clearCache() {
-        // This would clear the repository cache
-        // Implementation would connect to the actual cache clearing logic
+        let fileManager = FileManager.default
+        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let cacheFile = appSupport
+            .appendingPathComponent("GitPeek")
+            .appendingPathComponent("repositories.json")
+
+        if fileManager.fileExists(atPath: cacheFile.path) {
+            try? fileManager.removeItem(at: cacheFile)
+        }
+        showingCacheCleared = true
     }
 }
 
