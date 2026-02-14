@@ -8,7 +8,7 @@ struct GitPeekApp: App {
     
     var body: some Scene {
         Settings {
-            EmptyView()
+            SettingsView()
         }
         .commands {
             CommandGroup(after: .appInfo) {
