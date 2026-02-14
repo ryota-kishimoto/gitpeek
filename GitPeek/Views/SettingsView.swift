@@ -1,10 +1,11 @@
 import SwiftUI
 import Sparkle
+import ServiceManagement
 
 struct SettingsView: View {
     @AppStorage("refreshInterval") private var refreshInterval: Double = 30.0
     @AppStorage("showNotifications") private var showNotifications: Bool = false
-    @AppStorage("launchAtLogin") private var launchAtLogin: Bool = false
+    @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     @AppStorage("defaultTerminal") private var defaultTerminal: String = "Terminal"
     @AppStorage("defaultEditor") private var defaultEditor: String = "Cursor"
     
@@ -61,6 +62,17 @@ struct SettingsView: View {
                 Toggle("Show notifications for changes", isOn: $showNotifications)
                 
                 Toggle("Launch at login", isOn: $launchAtLogin)
+                    .onChange(of: launchAtLogin) { newValue in
+                        do {
+                            if newValue {
+                                try SMAppService.mainApp.register()
+                            } else {
+                                try SMAppService.mainApp.unregister()
+                            }
+                        } catch {
+                            launchAtLogin = !newValue
+                        }
+                    }
             } header: {
                 Text("General Settings")
                     .font(.headline)
@@ -159,7 +171,10 @@ struct SettingsView: View {
     private func resetToDefaults() {
         refreshInterval = 30.0
         showNotifications = false
-        launchAtLogin = false
+        if launchAtLogin {
+            launchAtLogin = false
+            try? SMAppService.mainApp.unregister()
+        }
         defaultTerminal = "Terminal"
         defaultEditor = "Cursor"
     }
