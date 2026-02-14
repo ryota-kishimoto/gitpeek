@@ -40,7 +40,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "folder.badge.gearshape", accessibilityDescription: "GitPeek")
+            if let iconPath = Bundle.main.path(forResource: "MenuBarIcon", ofType: "png"),
+               let icon = NSImage(contentsOfFile: iconPath) {
+                icon.isTemplate = true
+                icon.size = NSSize(width: 18, height: 18)
+                button.image = icon
+            } else {
+                button.image = NSImage(systemSymbolName: "folder.badge.gearshape", accessibilityDescription: "GitPeek")
+            }
             button.action = #selector(togglePopover)
         }
         

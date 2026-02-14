@@ -75,11 +75,44 @@ cat > GitPeek.app/Contents/Info.plist << EOF
 </plist>
 EOF
 
-# Create a simple icon (optional)
-echo "🎨 Creating default icon..."
-cat > GitPeek.app/Contents/Resources/AppIcon.icns << EOF
-# Placeholder for icon
-EOF
+# Generate all icons from SVG source
+ICON_SVG="gitpeek-icon.svg"
+MENUBAR_SVG="gitpeek-menubar.svg"
+
+if [ -f "$ICON_SVG" ]; then
+    # App icon (.icns) - transparent background, cyan
+    echo "🎨 Creating app icon..."
+    ICONSET_DIR=$(mktemp -d)/AppIcon.iconset
+    mkdir -p "$ICONSET_DIR"
+    magick -background none "$ICON_SVG" -resize 16x16     PNG32:"$ICONSET_DIR/icon_16x16.png"
+    magick -background none "$ICON_SVG" -resize 32x32     PNG32:"$ICONSET_DIR/icon_16x16@2x.png"
+    magick -background none "$ICON_SVG" -resize 32x32     PNG32:"$ICONSET_DIR/icon_32x32.png"
+    magick -background none "$ICON_SVG" -resize 64x64     PNG32:"$ICONSET_DIR/icon_32x32@2x.png"
+    magick -background none "$ICON_SVG" -resize 128x128   PNG32:"$ICONSET_DIR/icon_128x128.png"
+    magick -background none "$ICON_SVG" -resize 256x256   PNG32:"$ICONSET_DIR/icon_128x128@2x.png"
+    magick -background none "$ICON_SVG" -resize 256x256   PNG32:"$ICONSET_DIR/icon_256x256.png"
+    magick -background none "$ICON_SVG" -resize 512x512   PNG32:"$ICONSET_DIR/icon_256x256@2x.png"
+    magick -background none "$ICON_SVG" -resize 512x512   PNG32:"$ICONSET_DIR/icon_512x512.png"
+    magick -background none "$ICON_SVG" -resize 1024x1024 PNG32:"$ICONSET_DIR/icon_512x512@2x.png"
+    iconutil -c icns "$ICONSET_DIR" -o GitPeek.app/Contents/Resources/AppIcon.icns
+    rm -rf "$(dirname "$ICONSET_DIR")"
+
+    # In-app icon (color, transparent)
+    echo "🎨 Copying in-app icon..."
+    magick -background none "$ICON_SVG" -resize 64x64 PNG32:GitPeek.app/Contents/Resources/AppIconColor.png
+    magick -background none "$ICON_SVG" -resize 128x128 PNG32:GitPeek.app/Contents/Resources/AppIconColor@2x.png
+else
+    echo "⚠️  gitpeek-icon.svg not found, skipping icons"
+fi
+
+if [ -f "$MENUBAR_SVG" ]; then
+    # Menu bar icon (black template, transparent)
+    echo "🎨 Copying menu bar icon..."
+    magick -background none "$MENUBAR_SVG" -resize 18x18 PNG32:GitPeek.app/Contents/Resources/MenuBarIcon.png
+    magick -background none "$MENUBAR_SVG" -resize 36x36 PNG32:GitPeek.app/Contents/Resources/MenuBarIcon@2x.png
+else
+    echo "⚠️  gitpeek-menubar.svg not found, skipping menu bar icon"
+fi
 
 echo "✅ Build complete!"
 echo ""
