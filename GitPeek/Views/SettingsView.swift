@@ -177,9 +177,7 @@ struct AboutView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Image(systemName: "folder.badge.gearshape")
-                .font(.system(size: 64))
-                .foregroundColor(.accentColor)
+            AppIconView(size: 64)
             
             Text("GitPeek")
                 .font(.largeTitle)

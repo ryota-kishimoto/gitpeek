@@ -50,9 +50,7 @@ struct MenuBarView: View {
     
     private var headerView: some View {
         HStack {
-            Image(systemName: "folder.badge.gearshape")
-                .font(.title2)
-                .foregroundColor(.accentColor)
+            AppIconView(size: 24)
 
             VStack(alignment: .leading, spacing: 0) {
                 Text("GitPeek")
@@ -386,5 +384,24 @@ struct RepositoryRowView: View {
             }
         }
         .contentShape(Rectangle())
+    }
+}
+
+// MARK: - App Icon View
+
+struct AppIconView: View {
+    let size: CGFloat
+
+    var body: some View {
+        if let path = Bundle.main.path(forResource: "AppIconColor", ofType: "png"),
+           let nsImage = NSImage(contentsOfFile: path) {
+            Image(nsImage: nsImage)
+                .resizable()
+                .frame(width: size, height: size)
+        } else {
+            Image(systemName: "folder.badge.gearshape")
+                .font(.system(size: size * 0.7))
+                .foregroundColor(.accentColor)
+        }
     }
 }
