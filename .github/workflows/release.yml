@@ -168,8 +168,10 @@ jobs:
           shasum -a 256 GitPeek-${{ github.ref_name }}.dmg > GitPeek-${{ github.ref_name }}.dmg.sha256
           
       - name: Download and Setup Sparkle
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          SPARKLE_VERSION=$(gh api repos/sparkle-project/Sparkle/releases/latest --jq '.tag_name')
+          SPARKLE_VERSION=$(gh api repos/sparkle-project/Sparkle/releases/latest --jq '.tag_name' 2>/dev/null || echo "")
           if [ -z "$SPARKLE_VERSION" ]; then
             echo "Failed to fetch Sparkle version, using fallback"
             SPARKLE_VERSION="2.8.1"
