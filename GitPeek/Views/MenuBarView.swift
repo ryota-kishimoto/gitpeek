@@ -29,7 +29,10 @@ struct MenuBarView: View {
         }
         .frame(width: 350, height: 450)
         .background(VisualEffectView(material: .menu, blendingMode: .behindWindow))
-        .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
+        .alert("Error", isPresented: Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.errorMessage = nil } }
+        )) {
             Button("OK") {
                 viewModel.errorMessage = nil
             }
@@ -214,7 +217,6 @@ struct RepositoryRowView: View {
     let onPull: () -> Void
     
     @State private var isHovered = false
-    @State private var showActions = false
     
     var body: some View {
         HStack {
@@ -329,28 +331,29 @@ struct RepositoryRowView: View {
                             .disabled(true)
                         } else {
                             Button("Pull Changes", action: onPull)
-                                .disabled(repository.commitsBehind == 0 && repository.remoteURL == nil)
+                                .disabled(repository.remoteURL == nil)
                         }
 
                         Divider()
-                        
+
                         Button("Open on GitHub", action: onOpenOnGitHub)
                         Button("Open in SourceTree", action: onOpenInSourceTree)
                             .disabled(!FileManager.default.fileExists(atPath: "/Applications/SourceTree.app"))
                         Button("Copy Branch Name", action: onCopyBranch)
-                        
+
                         if let worktrees = repository.worktrees, !worktrees.isEmpty {
                             Divider()
                             Menu("Worktrees") {
                                 ForEach(worktrees, id: \.path) { worktree in
-                                    HStack {
+                                    Button {
+                                        NSWorkspace.shared.open(URL(fileURLWithPath: worktree.path))
+                                    } label: {
                                         if worktree.isMain {
                                             Label("\(worktree.branch) (main)", systemImage: "star")
                                         } else {
-                                            Text(worktree.branch)
+                                            Label(worktree.branch, systemImage: "folder")
                                         }
                                     }
-                                    .disabled(true)
                                 }
                             }
                         }

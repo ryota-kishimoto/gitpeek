@@ -4,20 +4,20 @@ import Combine
 @MainActor
 final class MenuBarViewModel: ObservableObject {
     // MARK: - Published Properties
-    
+
     @Published var isShowingPopover = false
     @Published var repositories: [Repository] = []
     @Published var isRefreshing = false
     @Published var selectedRepository: Repository?
     @Published var errorMessage: String?
-    
+
     // MARK: - Private Properties
-    
+
     private let repositoryStore = RepositoryStore()
     private let gitMonitor: GitMonitor
-    
+
     // MARK: - Computed Properties
-    
+
     var statusBarTitle: String {
         if repositories.isEmpty {
             return "GitPeek"
@@ -25,7 +25,7 @@ final class MenuBarViewModel: ObservableObject {
             return "GitPeek (\(repositories.count))"
         }
     }
-    
+
     var statusBarImage: String {
         if repositories.contains(where: { $0.gitStatus?.hasChanges == true }) {
             return "folder.badge.gear" // Has changes
@@ -33,12 +33,12 @@ final class MenuBarViewModel: ObservableObject {
             return "folder" // Clean
         }
     }
-    
+
     // MARK: - Initialization
-    
+
     init() {
         gitMonitor = GitMonitor(repositoryStore: repositoryStore)
-        
+
         // Clear any existing repositories in test environment
         #if DEBUG
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
@@ -48,13 +48,13 @@ final class MenuBarViewModel: ObservableObject {
         loadRepositories()
         gitMonitor.start()
     }
-    
+
     deinit {
         // GitMonitor will clean up in its own deinit
     }
-    
+
     // MARK: - Public Methods
-    
+
     func togglePopover() {
         isShowingPopover.toggle()
         // Auto-refresh when opening the popover (immediate, not delayed)
@@ -64,7 +64,7 @@ final class MenuBarViewModel: ObservableObject {
             }
         }
     }
-    
+
     func addRepository(path: String) async throws {
         do {
             try await repositoryStore.add(path)
@@ -78,7 +78,7 @@ final class MenuBarViewModel: ObservableObject {
             throw error
         }
     }
-    
+
     func selectRepositoryFolder(onComplete: (() -> Void)? = nil) {
         let openPanel = NSOpenPanel()
         openPanel.title = "Select Git Repository"
@@ -113,44 +113,43 @@ final class MenuBarViewModel: ObservableObject {
             onComplete?()
         }
     }
-    
+
     func removeRepository(_ repository: Repository) {
         repositoryStore.remove(repository.id)
         loadRepositories()
-        
+
         if selectedRepository?.id == repository.id {
             selectedRepository = nil
         }
     }
-    
+
     func selectRepository(_ repository: Repository) {
         selectedRepository = repository
     }
-    
+
     func refreshAll() async {
         guard !isRefreshing else { return }
         isRefreshing = true
         defer { isRefreshing = false }
-        
+
         await gitMonitor.forceUpdate()
         loadRepositories()
     }
-    
+
     func refreshRepository(_ repository: Repository) async {
         await gitMonitor.updateRepository(repository)
         loadRepositories()
     }
-    
+
     func openInFinder(repository: Repository) {
         let url = URL(fileURLWithPath: repository.path)
         NSWorkspace.shared.open(url)
     }
-    
+
     func openInTerminal(repository: Repository) {
-        print("Opening in Terminal: \(repository.path)")
         let terminal = UserDefaults.standard.string(forKey: "defaultTerminal") ?? "Terminal"
-        print("Using terminal: \(terminal)")
-        
+        Logger.debug("Opening in \(terminal): \(repository.path)")
+
         let script: String
         switch terminal {
         case "iTerm2":
@@ -178,59 +177,57 @@ final class MenuBarViewModel: ObservableObject {
             }
             return
         default: // Terminal
-            // Use a simpler approach - just open Terminal app with the directory
             let task = Process()
             task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
             task.arguments = ["-a", "Terminal", repository.path]
-            
+
             do {
                 try task.run()
                 task.waitUntilExit()
-                
+
                 // Now send the cd command using AppleScript
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                let repositoryPath = repository.path
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     let cdScript = """
                         tell application "Terminal"
                             if (count of windows) > 0 then
-                                do script "cd '\(repository.path.replacingOccurrences(of: "'", with: "'\\''"))'" in window 1
+                                do script "cd '\(repositoryPath.replacingOccurrences(of: "'", with: "'\\''"))'" in window 1
                             end if
                         end tell
                     """
-                    
+
                     if let scriptObject = NSAppleScript(source: cdScript) {
                         var error: NSDictionary?
                         scriptObject.executeAndReturnError(&error)
                         if let error = error {
-                            print("Error sending cd command: \(error)")
+                            Logger.error("Error sending cd command: \(error)")
                         }
                     }
                 }
-                print("Opened Terminal for: \(repository.path)")
+                Logger.debug("Opened Terminal for: \(repository.path)")
             } catch {
-                print("Failed to open Terminal: \(error)")
+                Logger.error("Failed to open Terminal: \(error)")
                 errorMessage = "Failed to open Terminal: \(error.localizedDescription)"
             }
             return
         }
-        
+
         if let scriptObject = NSAppleScript(source: script) {
             var error: NSDictionary?
             scriptObject.executeAndReturnError(&error)
-            
+
             if let error = error {
-                print("Error opening \(terminal): \(error)")
+                Logger.error("Error opening \(terminal): \(error)")
                 errorMessage = "Failed to open Terminal"
             }
         }
     }
-    
+
     func openInCursor(repository: Repository) {
-        print("Opening in Cursor: \(repository.path)")
         let editor = UserDefaults.standard.string(forKey: "defaultEditor") ?? "Cursor"
-        print("Using editor: \(editor)")
+        Logger.debug("Opening in \(editor): \(repository.path)")
         let escapedPath = repository.path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? repository.path
-        print("Escaped path: \(escapedPath)")
-        
+
         let urlString: String
         switch editor {
         case "VSCode":
@@ -255,80 +252,72 @@ final class MenuBarViewModel: ObservableObject {
                 "\(NSHomeDirectory())/bin/cursor",
                 "/opt/homebrew/bin/cursor"
             ]
-            
-            var cursorCLI: String? = nil
+
+            var cursorCLI: String?
             for path in cursorPaths {
                 if FileManager.default.fileExists(atPath: path) {
                     cursorCLI = path
                     break
                 }
             }
-            
+
             if let cursorPath = cursorCLI {
                 // Use cursor CLI with -n flag to force new window
                 let task = Process()
                 task.executableURL = URL(fileURLWithPath: cursorPath)
                 task.arguments = ["-n", repository.path]
-                
+
                 do {
                     try task.run()
                     task.waitUntilExit()
-                    print("Opened in new Cursor window via CLI: \(repository.path)")
+                    Logger.debug("Opened in new Cursor window via CLI: \(repository.path)")
                     return
                 } catch {
-                    print("Failed to use cursor CLI: \(error)")
+                    Logger.debug("Failed to use cursor CLI, trying fallback: \(error)")
                 }
             }
-            
+
             // Fallback: Use open command with -n flag to force new instance
             let task = Process()
             task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
             task.arguments = ["-n", "-a", "Cursor", repository.path]
-            
+
             do {
                 try task.run()
                 task.waitUntilExit()
-                print("Opened in new Cursor instance: \(repository.path)")
+                Logger.debug("Opened in new Cursor instance: \(repository.path)")
             } catch {
-                print("Failed to open Cursor: \(error)")
+                Logger.error("Failed to open Cursor: \(error)")
                 errorMessage = "Failed to open in Cursor"
             }
             return
         }
-        
-        print("Opening URL: \(urlString)")
+
         if let url = URL(string: urlString) {
-            print("URL created successfully, opening...")
             NSWorkspace.shared.open(url)
         } else {
-            print("Failed to create URL")
+            Logger.error("Failed to create URL: \(urlString)")
             errorMessage = "Failed to open in \(editor)"
         }
     }
-    
+
     func pullRepository(_ repository: Repository) async {
         do {
             let result = try await repositoryStore.pullRepository(repository.id)
-            
-            // Show success message or handle result
-            if result.contains("Already up to date") {
-                print("Repository is already up to date")
-            } else {
-                print("Pull successful: \(result)")
-            }
-            
+            Logger.debug("Pull result for \(repository.name): \(result)")
+
             // Refresh only this repository
             await refreshRepository(repository)
         } catch {
-            print("Failed to pull repository: \(error)")
+            Logger.error("Failed to pull \(repository.name): \(error)")
             errorMessage = "Failed to pull: \(error.localizedDescription)"
         }
     }
-    
+
     func openInSourceTree(repository: Repository) {
         let url = URL(fileURLWithPath: repository.path)
         let sourceTreeURL = URL(fileURLWithPath: "/Applications/SourceTree.app")
-        
+
         if FileManager.default.fileExists(atPath: sourceTreeURL.path) {
             NSWorkspace.shared.open(
                 [url],
@@ -339,13 +328,13 @@ final class MenuBarViewModel: ObservableObject {
             errorMessage = "SourceTree is not installed"
         }
     }
-    
+
     func openOnGitHub(repository: Repository) {
         guard let remoteURL = repository.remoteURL else {
             errorMessage = "No remote URL configured"
             return
         }
-        
+
         // Convert SSH to HTTPS
         let httpsURL: String
         if remoteURL.hasPrefix("git@github.com:") {
@@ -357,22 +346,22 @@ final class MenuBarViewModel: ObservableObject {
         } else {
             httpsURL = remoteURL
         }
-        
+
         if let url = URL(string: httpsURL) {
             NSWorkspace.shared.open(url)
         }
     }
-    
+
     func copyBranchName(repository: Repository) {
         guard let branch = repository.currentBranch else { return }
-        
+
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         pasteboard.setString(branch, forType: .string)
     }
-    
+
     // MARK: - Private Methods
-    
+
     private func loadRepositories() {
         repositories = repositoryStore.repositories
     }

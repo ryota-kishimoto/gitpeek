@@ -97,7 +97,7 @@ final class RepositoryStore: ObservableObject {
                 }
             }
         } catch {
-            print("Failed to update repository \(repository.name): \(error)")
+            Logger.error("Failed to update repository \(repository.name): \(error)")
         }
     }
     
@@ -162,7 +162,7 @@ final class RepositoryStore: ObservableObject {
             let data = try encoder.encode(repositories)
             try data.write(to: saveURL)
         } catch {
-            print("Failed to save repositories: \(error)")
+            Logger.error("Failed to save repositories: \(error)")
         }
     }
     
@@ -175,7 +175,7 @@ final class RepositoryStore: ObservableObject {
             let decoder = JSONDecoder()
             repositories = try decoder.decode([Repository].self, from: data)
         } catch {
-            print("Failed to load repositories: \(error)")
+            Logger.error("Failed to load repositories: \(error)")
         }
     }
 }

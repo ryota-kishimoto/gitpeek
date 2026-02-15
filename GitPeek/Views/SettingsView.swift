@@ -1,14 +1,18 @@
 import SwiftUI
 import Sparkle
+import ServiceManagement
 
 struct SettingsView: View {
     @AppStorage("refreshInterval") private var refreshInterval: Double = 30.0
     @AppStorage("showNotifications") private var showNotifications: Bool = false
-    @AppStorage("launchAtLogin") private var launchAtLogin: Bool = false
+    @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     @AppStorage("defaultTerminal") private var defaultTerminal: String = "Terminal"
     @AppStorage("defaultEditor") private var defaultEditor: String = "Cursor"
+    @AppStorage("gitCommandTimeout") private var gitCommandTimeout: Double = 30.0
+    @AppStorage("debugLogging") private var debugLogging: Bool = false
     
     @State private var showingAbout = false
+    @State private var showingCacheCleared = false
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -61,6 +65,17 @@ struct SettingsView: View {
                 Toggle("Show notifications for changes", isOn: $showNotifications)
                 
                 Toggle("Launch at login", isOn: $launchAtLogin)
+                    .onChange(of: launchAtLogin) { newValue in
+                        do {
+                            if newValue {
+                                try SMAppService.mainApp.register()
+                            } else {
+                                try SMAppService.mainApp.unregister()
+                            }
+                        } catch {
+                            launchAtLogin = !newValue
+                        }
+                    }
             } header: {
                 Text("General Settings")
                     .font(.headline)
@@ -128,15 +143,20 @@ struct SettingsView: View {
             Section {
                 HStack {
                     Text("Git Command Timeout:")
-                    TextField("", value: .constant(30.0), format: .number)
+                    TextField("", value: $gitCommandTimeout, format: .number)
                         .frame(width: 60)
                     Text("seconds")
                 }
-                
-                Toggle("Enable debug logging", isOn: .constant(false))
+
+                Toggle("Enable debug logging", isOn: $debugLogging)
                 
                 Button("Clear repository cache") {
                     clearCache()
+                }
+                .alert("Cache Cleared", isPresented: $showingCacheCleared) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text("Repository cache has been cleared. Repositories will be refreshed on next update.")
                 }
             } header: {
                 Text("Advanced Settings")
@@ -159,14 +179,27 @@ struct SettingsView: View {
     private func resetToDefaults() {
         refreshInterval = 30.0
         showNotifications = false
-        launchAtLogin = false
+        if launchAtLogin {
+            launchAtLogin = false
+            try? SMAppService.mainApp.unregister()
+        }
         defaultTerminal = "Terminal"
         defaultEditor = "Cursor"
+        gitCommandTimeout = 30.0
+        debugLogging = false
     }
     
     private func clearCache() {
-        // This would clear the repository cache
-        // Implementation would connect to the actual cache clearing logic
+        let fileManager = FileManager.default
+        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let cacheFile = appSupport
+            .appendingPathComponent("GitPeek")
+            .appendingPathComponent("repositories.json")
+
+        if fileManager.fileExists(atPath: cacheFile.path) {
+            try? fileManager.removeItem(at: cacheFile)
+        }
+        showingCacheCleared = true
     }
 }
 
