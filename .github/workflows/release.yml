@@ -116,7 +116,10 @@ jobs:
           
           # Make executable
           chmod +x "GitPeek.app/Contents/MacOS/GitPeek"
-          
+
+          # Fix rpath for Sparkle framework
+          install_name_tool -add_rpath "@executable_path/../Frameworks" "GitPeek.app/Contents/MacOS/GitPeek" 2>/dev/null || true
+
           # Sign the app (ad-hoc signing for now)
           codesign --force --deep --sign - "GitPeek.app"
           
