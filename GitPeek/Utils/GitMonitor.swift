@@ -38,7 +38,7 @@ final class GitMonitor: ObservableObject {
         guard !isMonitoring else { return }
         
         isMonitoring = true
-        print("[GitMonitor] Starting with interval: \(updateInterval) seconds")
+        Logger.debug("[GitMonitor] Starting with interval: \(updateInterval) seconds")
         
         // Initial update
         Task {
@@ -48,7 +48,7 @@ final class GitMonitor: ObservableObject {
         // Schedule periodic updates
         timer = Timer.scheduledTimer(withTimeInterval: updateInterval, repeats: true) { [weak self] _ in
             guard let self = self else { return }
-            print("[GitMonitor] Timer fired - updating repositories")
+            Logger.debug("[GitMonitor] Timer fired - updating repositories")
             Task { @MainActor in
                 await self.updateAllRepositories()
             }
@@ -86,7 +86,7 @@ final class GitMonitor: ObservableObject {
             return (repo.id, status)
         })
 
-        print("[GitMonitor] Updating all repositories (fetch: \(shouldFetch))...")
+        Logger.debug("[GitMonitor] Updating all repositories (fetch: \(shouldFetch))...")
         await store.updateAllRepositories(shouldFetch: shouldFetch)
 
         // Check for changes and send notifications
@@ -102,7 +102,7 @@ final class GitMonitor: ObservableObject {
         lastUpdateTime = Date()
         store.save()
         if let time = lastUpdateTime {
-            print("[GitMonitor] Update complete at \(time)")
+            Logger.debug("[GitMonitor] Update complete at \(time)")
         }
     }
 
@@ -111,7 +111,7 @@ final class GitMonitor: ObservableObject {
     private func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
             if let error = error {
-                print("[GitMonitor] Notification permission error: \(error)")
+                Logger.debug("[GitMonitor] Notification permission error: \(error)")
             }
         }
     }
@@ -152,20 +152,9 @@ final class GitMonitor: ObservableObject {
 
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
-                print("[GitMonitor] Failed to send notification: \(error)")
+                Logger.debug("[GitMonitor] Failed to send notification: \(error)")
             }
         }
     }
 }
 
-// MARK: - File System Watcher (Future Enhancement)
-
-extension GitMonitor {
-    /// Sets up file system watching for a repository
-    /// Uses FSEvents API to detect changes immediately instead of polling
-    func watchRepository(_ repository: Repository) {
-        // Future: Use DispatchSource.makeFileSystemObjectSource or FSEventStream
-        // to monitor the repository directory and trigger updates on file changes.
-        // Current approach uses timer-based polling which is sufficient for most use cases.
-    }
-}
