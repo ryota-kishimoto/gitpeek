@@ -53,7 +53,10 @@ final class GitCommand {
     
     // MARK: - Properties
     
-    private let defaultTimeout: TimeInterval = 30.0
+    private var defaultTimeout: TimeInterval {
+        let stored = UserDefaults.standard.double(forKey: "gitCommandTimeout")
+        return stored > 0 ? stored : 30.0
+    }
     private let cacheLock = NSLock()
     private var validationCache: [String: Bool] = [:]
     

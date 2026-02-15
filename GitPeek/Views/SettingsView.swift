@@ -8,6 +8,8 @@ struct SettingsView: View {
     @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     @AppStorage("defaultTerminal") private var defaultTerminal: String = "Terminal"
     @AppStorage("defaultEditor") private var defaultEditor: String = "Cursor"
+    @AppStorage("gitCommandTimeout") private var gitCommandTimeout: Double = 30.0
+    @AppStorage("debugLogging") private var debugLogging: Bool = false
     
     @State private var showingAbout = false
     @State private var showingCacheCleared = false
@@ -141,12 +143,12 @@ struct SettingsView: View {
             Section {
                 HStack {
                     Text("Git Command Timeout:")
-                    TextField("", value: .constant(30.0), format: .number)
+                    TextField("", value: $gitCommandTimeout, format: .number)
                         .frame(width: 60)
                     Text("seconds")
                 }
-                
-                Toggle("Enable debug logging", isOn: .constant(false))
+
+                Toggle("Enable debug logging", isOn: $debugLogging)
                 
                 Button("Clear repository cache") {
                     clearCache()
@@ -183,6 +185,8 @@ struct SettingsView: View {
         }
         defaultTerminal = "Terminal"
         defaultEditor = "Cursor"
+        gitCommandTimeout = 30.0
+        debugLogging = false
     }
     
     private func clearCache() {
