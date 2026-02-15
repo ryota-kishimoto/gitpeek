@@ -45,6 +45,8 @@ cat > GitPeek.app/Contents/Info.plist << EOF
 <dict>
     <key>CFBundleExecutable</key>
     <string>GitPeek</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
     <string>com.gitpeek.GitPeek</string>
     <key>CFBundleName</key>
