@@ -143,7 +143,9 @@ jobs:
           
       - name: Download and Setup Sparkle
         run: |
-          curl -L https://github.com/sparkle-project/Sparkle/releases/latest/download/Sparkle-2.7.1.tar.xz -o Sparkle.tar.xz
+          SPARKLE_VERSION=$(curl -s https://api.github.com/repos/sparkle-project/Sparkle/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "Downloading Sparkle ${SPARKLE_VERSION}..."
+          curl -L "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" -o Sparkle.tar.xz
           tar -xf Sparkle.tar.xz
           
       - name: Sign DMG with Sparkle
