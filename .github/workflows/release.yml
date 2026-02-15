@@ -114,6 +114,9 @@ jobs:
           </plist>
           PLIST_EOF
           
+          # Copy app icon
+          cp Resources/AppIcon.icns "GitPeek.app/Contents/Resources/AppIcon.icns"
+
           # Make executable
           chmod +x "GitPeek.app/Contents/MacOS/GitPeek"
 
