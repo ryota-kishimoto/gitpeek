@@ -172,6 +172,9 @@ dmg: export ## DMGファイル作成
 		--icon "GitPeek.app" 175 190 \
 		--hide-extension "GitPeek.app" \
 		--app-drop-link 425 190 \
+		--background "Resources/dmg-background.png" \
+		--text-size 12 \
+		--no-internet-enable \
 		"GitPeek.dmg" \
 		"build/GitPeek.app"
 
