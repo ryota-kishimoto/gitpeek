@@ -56,7 +56,7 @@ jobs:
             
       - name: Upload Failed Snapshots
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: failed-snapshots
           path: |
@@ -66,7 +66,7 @@ jobs:
           
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-results
           path: TestResults.xcresult
@@ -146,7 +146,7 @@ jobs:
           
       - name: Upload Comparison Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: snapshot-comparison
           path: snapshot-diff.txt
