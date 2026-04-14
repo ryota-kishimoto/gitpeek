@@ -84,20 +84,15 @@ final class RepositoryStore: ObservableObject {
 
             // Optionally fetch in background (slow, but updates remote info)
             if shouldFetch {
-                Task {
+                Task { @MainActor in
                     try? await gitCommand.fetch(at: path)
                     // Re-check commit difference after fetch
                     if let newCommitDiff = try? await gitCommand.getCommitDifference(at: path) {
-                        await MainActor.run {
-                            if let currentIndex = repositories.firstIndex(where: { $0.id == id }) {
-                                var updated = repositories[currentIndex]
-                                updated.updateCommitDifference(
-                                    behind: newCommitDiff.behind,
-                                    ahead: newCommitDiff.ahead
-                                )
-                                repositories[currentIndex] = updated
-                            }
-                        }
+                        self.applyCommitDifference(
+                            id: id,
+                            behind: newCommitDiff.behind,
+                            ahead: newCommitDiff.ahead
+                        )
                     }
                 }
             }
@@ -150,6 +145,13 @@ final class RepositoryStore: ObservableObject {
         guard let index = repositories.firstIndex(where: { $0.id == id }) else { return }
         var updated = repositories[index]
         updated.isPulling = value
+        repositories[index] = updated
+    }
+
+    private func applyCommitDifference(id: UUID, behind: Int, ahead: Int) {
+        guard let index = repositories.firstIndex(where: { $0.id == id }) else { return }
+        var updated = repositories[index]
+        updated.updateCommitDifference(behind: behind, ahead: ahead)
         repositories[index] = updated
     }
     
