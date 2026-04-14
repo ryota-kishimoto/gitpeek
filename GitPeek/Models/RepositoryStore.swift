@@ -58,39 +58,44 @@ final class RepositoryStore: ObservableObject {
     /// - Parameter id: Repository ID to update
     /// - Parameter shouldFetch: Whether to fetch from remote (default: false for speed)
     func updateRepository(_ id: UUID, shouldFetch: Bool = false) async {
-        guard let index = repositories.firstIndex(where: { $0.id == id }) else { return }
-
-        let repository = repositories[index]
+        guard let repository = repositories.first(where: { $0.id == id }) else { return }
+        let path = repository.path
 
         do {
             // Run fast local git commands in parallel
-            async let status = gitCommand.getStatus(at: repository.path)
-            async let branch = gitCommand.getCurrentBranch(at: repository.path)
-            async let remoteURL = gitCommand.getRemoteURL(at: repository.path)
-            async let worktrees = gitCommand.getWorktrees(at: repository.path)
-            async let commitDiff = gitCommand.getCommitDifference(at: repository.path)
+            async let status = gitCommand.getStatus(at: path)
+            async let branch = gitCommand.getCurrentBranch(at: path)
+            async let remoteURL = gitCommand.getRemoteURL(at: path)
+            async let worktrees = gitCommand.getWorktrees(at: path)
+            async let commitDiff = gitCommand.getCommitDifference(at: path)
 
             // Wait for all results
             let (statusResult, branchResult, remoteURLResult, worktreesResult, commitDiffResult) =
                 try await (status, branch, remoteURL, worktrees, commitDiff)
 
-            repositories[index].updateStatus(statusResult, branch: branchResult)
-            repositories[index].updateRemoteURL(remoteURLResult)
-            repositories[index].updateWorktrees(worktreesResult)
-            repositories[index].updateCommitDifference(behind: commitDiffResult.behind, ahead: commitDiffResult.ahead)
+            if let index = repositories.firstIndex(where: { $0.id == id }) {
+                var updated = repositories[index]
+                updated.updateStatus(statusResult, branch: branchResult)
+                updated.updateRemoteURL(remoteURLResult)
+                updated.updateWorktrees(worktreesResult)
+                updated.updateCommitDifference(behind: commitDiffResult.behind, ahead: commitDiffResult.ahead)
+                repositories[index] = updated
+            }
 
             // Optionally fetch in background (slow, but updates remote info)
             if shouldFetch {
                 Task {
-                    try? await gitCommand.fetch(at: repository.path)
+                    try? await gitCommand.fetch(at: path)
                     // Re-check commit difference after fetch
-                    if let newCommitDiff = try? await gitCommand.getCommitDifference(at: repository.path) {
+                    if let newCommitDiff = try? await gitCommand.getCommitDifference(at: path) {
                         await MainActor.run {
                             if let currentIndex = repositories.firstIndex(where: { $0.id == id }) {
-                                repositories[currentIndex].updateCommitDifference(
+                                var updated = repositories[currentIndex]
+                                updated.updateCommitDifference(
                                     behind: newCommitDiff.behind,
                                     ahead: newCommitDiff.ahead
                                 )
+                                repositories[currentIndex] = updated
                             }
                         }
                     }
@@ -125,18 +130,27 @@ final class RepositoryStore: ObservableObject {
             throw RepositoryError.notFound
         }
 
+        let path = repositories[index].path
+
         // Set pulling state
-        repositories[index].isPulling = true
+        setPulling(id: id, value: true)
 
         do {
-            let result = try await gitCommand.pull(at: repositories[index].path)
+            let result = try await gitCommand.pull(at: path)
             await updateRepository(id)
-            repositories[index].isPulling = false
+            setPulling(id: id, value: false)
             return result
         } catch {
-            repositories[index].isPulling = false
+            setPulling(id: id, value: false)
             throw error
         }
+    }
+
+    private func setPulling(id: UUID, value: Bool) {
+        guard let index = repositories.firstIndex(where: { $0.id == id }) else { return }
+        var updated = repositories[index]
+        updated.isPulling = value
+        repositories[index] = updated
     }
     
     /// Clears all repositories

@@ -109,11 +109,28 @@ final class GitMonitor: ObservableObject {
     // MARK: - Notifications
 
     private func requestNotificationPermission() {
+        // UNUserNotificationCenter requires a bundled app and crashes with
+        // "bundleProxyForCurrentProcess is nil" when invoked from a unit-test
+        // host (either XCTest via Xcode or swift-test). Skip in any test run.
+        if Self.isRunningInTests {
+            return
+        }
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
             if let error = error {
                 Logger.debug("[GitMonitor] Notification permission error: \(error)")
             }
         }
+    }
+
+    private static var isRunningInTests: Bool {
+        if NSClassFromString("XCTestCase") != nil {
+            return true
+        }
+        let env = ProcessInfo.processInfo.environment
+        if env["XCTestConfigurationFilePath"] != nil || env["XCTestBundlePath"] != nil {
+            return true
+        }
+        return false
     }
 
     private func checkAndNotify(repository: Repository, oldStatus: GitStatus?, newStatus: GitStatus) {
