@@ -137,3 +137,6 @@ docs/.jekyll-cache/
 *.backup
 tmp/
 temp/
+
+# Claude Code MCP (per-developer; see .mcp.json.example)
+.mcp.json
