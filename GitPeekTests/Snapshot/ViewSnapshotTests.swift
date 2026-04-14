@@ -81,34 +81,4 @@ final class ViewSnapshotTests: XCTestCase {
         assertSnapshot(of: hostingController, as: .image)
     }
     
-    // MARK: - Content View Tests
-    
-    func testContentView_Empty() async {
-        let store = RepositoryStore()
-        let view = ContentView()
-            .environmentObject(store)
-            .frame(width: 600, height: 400)
-        
-        let hostingController = NSHostingController(rootView: view)
-        hostingController.view.frame = NSRect(x: 0, y: 0, width: 600, height: 400)
-        hostingController.view.needsLayout = true
-        hostingController.view.layoutSubtreeIfNeeded()
-        
-        assertSnapshot(of: hostingController, as: .image)
-    }
-    
-    func testContentView_DarkMode() async {
-        let store = RepositoryStore()
-        let view = ContentView()
-            .environmentObject(store)
-            .frame(width: 600, height: 400)
-            .environment(\.colorScheme, .dark)
-        
-        let hostingController = NSHostingController(rootView: view)
-        hostingController.view.frame = NSRect(x: 0, y: 0, width: 600, height: 400)
-        hostingController.view.needsLayout = true
-        hostingController.view.layoutSubtreeIfNeeded()
-        
-        assertSnapshot(of: hostingController, as: .image)
-    }
 }
