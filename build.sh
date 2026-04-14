@@ -65,6 +65,14 @@ cat > GitPeek.app/Contents/Info.plist << EOF
     <true/>
     <key>NSSupportsAutomaticTermination</key>
     <false/>
+    <key>NSDesktopFolderUsageDescription</key>
+    <string>GitPeek needs access to your Desktop folder to monitor Git repositories stored there.</string>
+    <key>NSDocumentsFolderUsageDescription</key>
+    <string>GitPeek needs access to your Documents folder to monitor Git repositories stored there.</string>
+    <key>NSDownloadsFolderUsageDescription</key>
+    <string>GitPeek needs access to your Downloads folder to monitor Git repositories stored there.</string>
+    <key>NSRemovableVolumesUsageDescription</key>
+    <string>GitPeek needs access to removable volumes to monitor Git repositories stored there.</string>
     <key>SUFeedURL</key>
     <string>https://raw.githubusercontent.com/ryota-kishimoto/gitpeek/main/appcast.xml</string>
     <key>SUEnableAutomaticChecks</key>
