@@ -23,7 +23,7 @@ let package = Package(
                 .product(name: "Sparkle", package: "Sparkle")
             ],
             path: "GitPeek",
-            exclude: ["Assets.xcassets", "GitPeek.entitlements"]
+            exclude: ["Assets.xcassets"]
         ),
         .testTarget(
             name: "GitPeekTests",
