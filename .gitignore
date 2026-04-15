@@ -140,3 +140,9 @@ temp/
 
 # Claude Code MCP (per-developer; see .mcp.json.example)
 .mcp.json
+
+# Claude Code scheduled task lock (per-developer)
+.claude/scheduled_tasks.lock
+
+# Icon design experiments (local scratch)
+icon-experiments/
