@@ -3,7 +3,7 @@ import Foundation
 /// Simple logger that respects the debugLogging user preference
 enum Logger {
     static func debug(_ message: @autoclosure () -> String) {
-        guard UserDefaults.standard.bool(forKey: "debugLogging") else { return }
+        guard UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKey.debugLogging) else { return }
         print("[GitPeek] \(message())")
     }
 

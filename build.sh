@@ -34,56 +34,33 @@ fi
 echo "🔧 Fixing rpath..."
 install_name_tool -add_rpath "@executable_path/../Frameworks" GitPeek.app/Contents/MacOS/GitPeek 2>/dev/null || true
 
-# Get version from source Info.plist  
-VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "GitPeek/Info.plist" 2>/dev/null || echo "1.0.0")
+# Start from the source Info.plist so there is a single source of truth for
+# things like Sparkle keys, copyright, and usage descriptions. Then patch the
+# fields that can't use build-setting variables at runtime (CFBundleExecutable,
+# CFBundleIdentifier, LSMinimumSystemVersion).
+SOURCE_PLIST="GitPeek/Info.plist"
+DEST_PLIST="GitPeek.app/Contents/Info.plist"
 
-# Create Info.plist
-cat > GitPeek.app/Contents/Info.plist << EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleExecutable</key>
-    <string>GitPeek</string>
-    <key>CFBundleIconFile</key>
-    <string>AppIcon</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.gitpeek.GitPeek</string>
-    <key>CFBundleName</key>
-    <string>GitPeek</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleShortVersionString</key>
-    <string>${VERSION}</string>
-    <key>CFBundleVersion</key>
-    <string>${VERSION}</string>
-    <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
-    <key>LSUIElement</key>
-    <true/>
-    <key>NSHighResolutionCapable</key>
-    <true/>
-    <key>NSSupportsAutomaticTermination</key>
-    <false/>
-    <key>NSDesktopFolderUsageDescription</key>
-    <string>GitPeek needs access to your Desktop folder to monitor Git repositories stored there.</string>
-    <key>NSDocumentsFolderUsageDescription</key>
-    <string>GitPeek needs access to your Documents folder to monitor Git repositories stored there.</string>
-    <key>NSDownloadsFolderUsageDescription</key>
-    <string>GitPeek needs access to your Downloads folder to monitor Git repositories stored there.</string>
-    <key>NSRemovableVolumesUsageDescription</key>
-    <string>GitPeek needs access to removable volumes to monitor Git repositories stored there.</string>
-    <key>SUFeedURL</key>
-    <string>https://raw.githubusercontent.com/ryota-kishimoto/gitpeek/main/appcast.xml</string>
-    <key>SUEnableAutomaticChecks</key>
-    <true/>
-    <key>SUScheduledCheckInterval</key>
-    <integer>86400</integer>
-    <key>SUPublicEDKey</key>
-    <string>VuF1RDfpkALoNuceWkjdqQC8tKsTRcPEBgWnD1iIkOY=</string>
-</dict>
-</plist>
-EOF
+VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$SOURCE_PLIST" 2>/dev/null || echo "1.0.0")
+
+cp "$SOURCE_PLIST" "$DEST_PLIST"
+
+plist_set() {
+    local key="$1"
+    local type="$2"
+    local value="$3"
+    /usr/libexec/PlistBuddy -c "Set :$key $value" "$DEST_PLIST" 2>/dev/null \
+        || /usr/libexec/PlistBuddy -c "Add :$key $type $value" "$DEST_PLIST"
+}
+
+plist_set "CFBundleExecutable" "string" "GitPeek"
+plist_set "CFBundleIdentifier" "string" "com.gitpeek.GitPeek"
+plist_set "CFBundleName" "string" "GitPeek"
+plist_set "CFBundlePackageType" "string" "APPL"
+plist_set "CFBundleShortVersionString" "string" "$VERSION"
+plist_set "CFBundleVersion" "string" "$VERSION"
+plist_set "LSMinimumSystemVersion" "string" "13.0"
+plist_set "NSSupportsAutomaticTermination" "bool" "false"
 
 # Generate all icons from SVG source
 ICON_SVG="gitpeek-icon.svg"

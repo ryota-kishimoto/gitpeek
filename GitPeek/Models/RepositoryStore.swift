@@ -7,13 +7,11 @@ final class RepositoryStore: ObservableObject {
     @Published private(set) var repositories: [Repository] = []
     
     private let gitCommand = GitCommand()
-    private let persistenceKey = "com.gitpeek.repositories"
+    private let persistenceKey = AppConstants.Persistence.repositoriesKey
     private let fileManager = FileManager.default
-    
+
     private var saveURL: URL {
-        fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("GitPeek")
-            .appendingPathComponent("repositories.json")
+        AppConstants.Persistence.repositoriesFileURL
     }
     
     init() {
