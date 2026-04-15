@@ -20,9 +20,9 @@ final class GitMonitor: ObservableObject {
 
     init(repositoryStore: RepositoryStore, updateInterval: TimeInterval? = nil) {
         self.repositoryStore = repositoryStore
-        // Use the stored preference or default to 10 seconds for more real-time updates
-        let interval = updateInterval ?? UserDefaults.standard.double(forKey: "refreshInterval")
-        self.updateInterval = interval > 0 ? interval : 10.0
+        // Use the stored preference or fall back to the monitor's built-in interval.
+        let interval = updateInterval ?? UserDefaults.standard.double(forKey: AppConstants.UserDefaultsKey.refreshInterval)
+        self.updateInterval = interval > 0 ? interval : AppConstants.Defaults.gitMonitorFallbackInterval
 
         requestNotificationPermission()
     }
@@ -90,7 +90,7 @@ final class GitMonitor: ObservableObject {
         await store.updateAllRepositories(shouldFetch: shouldFetch)
 
         // Check for changes and send notifications
-        let showNotifications = UserDefaults.standard.bool(forKey: "showNotifications")
+        let showNotifications = UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKey.showNotifications)
         if showNotifications {
             for repo in store.repositories {
                 guard let newStatus = repo.gitStatus else { continue }

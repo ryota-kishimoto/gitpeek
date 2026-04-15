@@ -54,8 +54,8 @@ final class GitCommand {
     // MARK: - Properties
     
     private var defaultTimeout: TimeInterval {
-        let stored = UserDefaults.standard.double(forKey: "gitCommandTimeout")
-        return stored > 0 ? stored : 30.0
+        let stored = UserDefaults.standard.double(forKey: AppConstants.UserDefaultsKey.gitCommandTimeout)
+        return stored > 0 ? stored : AppConstants.Defaults.gitCommandTimeout
     }
     private let cacheLock = NSLock()
     private var validationCache: [String: Bool] = [:]
@@ -140,7 +140,7 @@ final class GitCommand {
     /// - Throws: GitError if the operation fails
     func fetch(at path: String) async throws {
         try validateRepositoryPath(path)
-        _ = try await execute("git fetch --quiet", at: path, timeout: 30.0)
+        _ = try await execute("git fetch --quiet", at: path, timeout: AppConstants.Defaults.gitFetchTimeout)
     }
 
     /// Pulls changes from the remote repository
@@ -152,7 +152,7 @@ final class GitCommand {
 
         // Use --ff-only to prevent unwanted merges (safest option)
         // If fast-forward is not possible, it will fail with a clear message
-        let output = try await execute("git pull --ff-only", at: path, timeout: 60.0)
+        let output = try await execute("git pull --ff-only", at: path, timeout: AppConstants.Defaults.gitPullTimeout)
         return output.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
@@ -363,7 +363,7 @@ final class GitCommand {
         let outputPipe = Pipe()
         let errorPipe = Pipe()
         
-        process.executableURL = URL(fileURLWithPath: "/bin/bash")
+        process.executableURL = URL(fileURLWithPath: AppConstants.ExternalAppPath.bash)
         process.arguments = ["-c", command]
         process.currentDirectoryURL = URL(fileURLWithPath: path)
         process.standardOutput = outputPipe

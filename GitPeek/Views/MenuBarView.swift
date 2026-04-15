@@ -59,7 +59,7 @@ struct MenuBarView: View {
                 Text("GitPeek")
                     .font(.headline)
                     .foregroundColor(AppTheme.primaryText)
-                Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")")
+                Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? AppConstants.Layout.versionFallback)")
                     .font(.caption2)
                     .foregroundColor(AppTheme.secondaryText)
             }
@@ -338,7 +338,7 @@ struct RepositoryRowView: View {
 
                         Button("Open on GitHub", action: onOpenOnGitHub)
                         Button("Open in SourceTree", action: onOpenInSourceTree)
-                            .disabled(!FileManager.default.fileExists(atPath: "/Applications/SourceTree.app"))
+                            .disabled(!FileManager.default.fileExists(atPath: AppConstants.ExternalAppPath.sourceTree))
                         Button("Copy Branch Name", action: onCopyBranch)
 
                         if let worktrees = repository.worktrees, !worktrees.isEmpty {

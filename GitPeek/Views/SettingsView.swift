@@ -3,13 +3,19 @@ import Sparkle
 import ServiceManagement
 
 struct SettingsView: View {
-    @AppStorage("refreshInterval") private var refreshInterval: Double = 30.0
-    @AppStorage("showNotifications") private var showNotifications: Bool = false
+    @AppStorage(AppConstants.UserDefaultsKey.refreshInterval)
+    private var refreshInterval: Double = AppConstants.Defaults.refreshInterval
+    @AppStorage(AppConstants.UserDefaultsKey.showNotifications)
+    private var showNotifications: Bool = AppConstants.Defaults.showNotifications
     @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
-    @AppStorage("defaultTerminal") private var defaultTerminal: String = "Terminal"
-    @AppStorage("defaultEditor") private var defaultEditor: String = "Cursor"
-    @AppStorage("gitCommandTimeout") private var gitCommandTimeout: Double = 30.0
-    @AppStorage("debugLogging") private var debugLogging: Bool = false
+    @AppStorage(AppConstants.UserDefaultsKey.defaultTerminal)
+    private var defaultTerminal: String = AppConstants.Defaults.terminal
+    @AppStorage(AppConstants.UserDefaultsKey.defaultEditor)
+    private var defaultEditor: String = AppConstants.Defaults.editor
+    @AppStorage(AppConstants.UserDefaultsKey.gitCommandTimeout)
+    private var gitCommandTimeout: Double = AppConstants.Defaults.gitCommandTimeout
+    @AppStorage(AppConstants.UserDefaultsKey.debugLogging)
+    private var debugLogging: Bool = AppConstants.Defaults.debugLogging
     
     @State private var showingAbout = false
     @State private var showingCacheCleared = false
@@ -46,7 +52,7 @@ struct SettingsView: View {
                     }
             }
         }
-        .frame(width: 500, height: 450)
+        .frame(width: AppConstants.Layout.settingsWindowWidth, height: AppConstants.Layout.settingsWindowHeight)
     }
     
     // MARK: - General Settings
@@ -56,7 +62,11 @@ struct SettingsView: View {
             Section {
                 HStack {
                     Text("Refresh Interval:")
-                    Slider(value: $refreshInterval, in: 10...300, step: 10)
+                    Slider(
+                        value: $refreshInterval,
+                        in: AppConstants.Layout.refreshIntervalRange,
+                        step: AppConstants.Layout.refreshIntervalStep
+                    )
                         .frame(width: 200)
                     Text("\(Int(refreshInterval)) seconds")
                         .frame(width: 80, alignment: .trailing)
@@ -107,18 +117,18 @@ struct SettingsView: View {
         Form {
             Section {
                 Picker("Default Terminal:", selection: $defaultTerminal) {
-                    Text("Terminal").tag("Terminal")
-                    Text("iTerm2").tag("iTerm2")
-                    Text("Warp").tag("Warp")
-                    Text("Hyper").tag("Hyper")
+                    Text("Terminal").tag(AppConstants.Terminal.terminal)
+                    Text("iTerm2").tag(AppConstants.Terminal.iterm2)
+                    Text("Warp").tag(AppConstants.Terminal.warp)
+                    Text("Hyper").tag(AppConstants.Terminal.hyper)
                 }
-                
+
                 Picker("Default Editor:", selection: $defaultEditor) {
-                    Text("Cursor").tag("Cursor")
-                    Text("VSCode").tag("VSCode")
-                    Text("Sublime Text").tag("Sublime")
-                    Text("Xcode").tag("Xcode")
-                    Text("Nova").tag("Nova")
+                    Text("Cursor").tag(AppConstants.Editor.cursor)
+                    Text("VSCode").tag(AppConstants.Editor.vscode)
+                    Text("Sublime Text").tag(AppConstants.Editor.sublime)
+                    Text("Xcode").tag(AppConstants.Editor.xcode)
+                    Text("Nova").tag(AppConstants.Editor.nova)
                 }
             } header: {
                 Text("External Applications")
@@ -177,24 +187,21 @@ struct SettingsView: View {
     // MARK: - Actions
     
     private func resetToDefaults() {
-        refreshInterval = 30.0
-        showNotifications = false
+        refreshInterval = AppConstants.Defaults.refreshInterval
+        showNotifications = AppConstants.Defaults.showNotifications
         if launchAtLogin {
             launchAtLogin = false
             try? SMAppService.mainApp.unregister()
         }
-        defaultTerminal = "Terminal"
-        defaultEditor = "Cursor"
-        gitCommandTimeout = 30.0
-        debugLogging = false
+        defaultTerminal = AppConstants.Defaults.terminal
+        defaultEditor = AppConstants.Defaults.editor
+        gitCommandTimeout = AppConstants.Defaults.gitCommandTimeout
+        debugLogging = AppConstants.Defaults.debugLogging
     }
-    
+
     private func clearCache() {
         let fileManager = FileManager.default
-        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        let cacheFile = appSupport
-            .appendingPathComponent("GitPeek")
-            .appendingPathComponent("repositories.json")
+        let cacheFile = AppConstants.Persistence.repositoriesFileURL
 
         if fileManager.fileExists(atPath: cacheFile.path) {
             try? fileManager.removeItem(at: cacheFile)
@@ -216,7 +223,7 @@ struct AboutView: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
             
-            Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")")
+            Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? AppConstants.Layout.versionFallback)")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             
@@ -229,13 +236,13 @@ struct AboutView: View {
                 .padding(.vertical)
             
             VStack(alignment: .leading, spacing: 8) {
-                if let url = URL(string: "https://github.com/ryota-kishimoto/gitpeek") {
+                if let url = URL(string: AppConstants.GitHub.repositoryURL) {
                     Link("GitHub Repository", destination: url)
                 }
-                if let url = URL(string: "https://github.com/ryota-kishimoto/gitpeek/issues") {
+                if let url = URL(string: AppConstants.GitHub.issuesURL) {
                     Link("Report an Issue", destination: url)
                 }
-                if let url = URL(string: "https://github.com/ryota-kishimoto/gitpeek/blob/main/LICENSE") {
+                if let url = URL(string: AppConstants.GitHub.licenseURL) {
                     Link("License: MIT", destination: url)
                 }
             }
@@ -250,17 +257,17 @@ struct AboutView: View {
                 .padding(.bottom, 8)
             }
             
-            Text("© 2025 GitPeek. All rights reserved.")
+            Text(AppConstants.Layout.copyrightText)
                 .font(.caption)
                 .foregroundColor(.secondary)
-            
+
             Button("Close") {
                 isPresented = false
             }
             .padding(.bottom)
         }
         .padding(20)
-        .frame(width: 350, height: 450)
+        .frame(width: AppConstants.Layout.aboutWindowWidth, height: AppConstants.Layout.aboutWindowHeight)
     }
 }
 

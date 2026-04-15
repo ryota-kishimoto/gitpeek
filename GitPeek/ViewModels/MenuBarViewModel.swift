@@ -147,12 +147,13 @@ final class MenuBarViewModel: ObservableObject {
     }
 
     func openInTerminal(repository: Repository) {
-        let terminal = UserDefaults.standard.string(forKey: "defaultTerminal") ?? "Terminal"
+        let terminal = UserDefaults.standard.string(forKey: AppConstants.UserDefaultsKey.defaultTerminal)
+            ?? AppConstants.Defaults.terminal
         Logger.debug("Opening in \(terminal): \(repository.path)")
 
         let script: String
         switch terminal {
-        case "iTerm2":
+        case AppConstants.Terminal.iterm2:
             script = """
                 tell application "iTerm"
                     activate
@@ -162,24 +163,24 @@ final class MenuBarViewModel: ObservableObject {
                     end tell
                 end tell
             """
-        case "Warp":
+        case AppConstants.Terminal.warp:
             // Warp doesn't have AppleScript support, use URL scheme
             let escapedPath = repository.path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? repository.path
-            if let url = URL(string: "warp://action/new_tab?path=\(escapedPath)") {
+            if let url = URL(string: AppConstants.URLScheme.warpNewTab(path: escapedPath)) {
                 NSWorkspace.shared.open(url)
             }
             return
-        case "Hyper":
+        case AppConstants.Terminal.hyper:
             // Hyper doesn't have good AppleScript support
             let escapedPath = repository.path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? repository.path
-            if let url = URL(string: "hyper://cd?path=\(escapedPath)") {
+            if let url = URL(string: AppConstants.URLScheme.hyperCD(path: escapedPath)) {
                 NSWorkspace.shared.open(url)
             }
             return
         default: // Terminal
             let task = Process()
-            task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-            task.arguments = ["-a", "Terminal", repository.path]
+            task.executableURL = URL(fileURLWithPath: AppConstants.ExternalAppPath.open)
+            task.arguments = ["-a", AppConstants.Terminal.terminal, repository.path]
 
             do {
                 try task.run()
@@ -224,41 +225,32 @@ final class MenuBarViewModel: ObservableObject {
     }
 
     func openInCursor(repository: Repository) {
-        let editor = UserDefaults.standard.string(forKey: "defaultEditor") ?? "Cursor"
+        let editor = UserDefaults.standard.string(forKey: AppConstants.UserDefaultsKey.defaultEditor)
+            ?? AppConstants.Defaults.editor
         Logger.debug("Opening in \(editor): \(repository.path)")
         let escapedPath = repository.path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? repository.path
 
         let urlString: String
         switch editor {
-        case "VSCode":
-            urlString = "vscode://file/\(escapedPath)"
-        case "Sublime":
-            urlString = "subl://\(escapedPath)"
-        case "Xcode":
+        case AppConstants.Editor.vscode:
+            urlString = "\(AppConstants.URLScheme.vscodeFile)\(escapedPath)"
+        case AppConstants.Editor.sublime:
+            urlString = "\(AppConstants.URLScheme.sublime)\(escapedPath)"
+        case AppConstants.Editor.xcode:
             // Open with Xcode using NSWorkspace
             let url = URL(fileURLWithPath: repository.path)
             NSWorkspace.shared.open(
                 [url],
-                withApplicationAt: URL(fileURLWithPath: "/Applications/Xcode.app"),
+                withApplicationAt: URL(fileURLWithPath: AppConstants.ExternalAppPath.xcode),
                 configuration: NSWorkspace.OpenConfiguration()
             )
             return
-        case "Nova":
-            urlString = "nova://\(escapedPath)"
+        case AppConstants.Editor.nova:
+            urlString = "\(AppConstants.URLScheme.nova)\(escapedPath)"
         default: // Cursor
             // First check if cursor CLI is available
-            let cursorPaths = [
-                "/usr/local/bin/cursor",
-                "\(NSHomeDirectory())/bin/cursor",
-                "/opt/homebrew/bin/cursor"
-            ]
-
-            var cursorCLI: String?
-            for path in cursorPaths {
-                if FileManager.default.fileExists(atPath: path) {
-                    cursorCLI = path
-                    break
-                }
+            let cursorCLI = AppConstants.ExternalAppPath.cursorCLICandidates.first {
+                FileManager.default.fileExists(atPath: $0)
             }
 
             if let cursorPath = cursorCLI {
@@ -279,8 +271,8 @@ final class MenuBarViewModel: ObservableObject {
 
             // Fallback: Use open command with -n flag to force new instance
             let task = Process()
-            task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-            task.arguments = ["-n", "-a", "Cursor", repository.path]
+            task.executableURL = URL(fileURLWithPath: AppConstants.ExternalAppPath.open)
+            task.arguments = ["-n", "-a", AppConstants.Editor.cursor, repository.path]
 
             do {
                 try task.run()
@@ -316,7 +308,7 @@ final class MenuBarViewModel: ObservableObject {
 
     func openInSourceTree(repository: Repository) {
         let url = URL(fileURLWithPath: repository.path)
-        let sourceTreeURL = URL(fileURLWithPath: "/Applications/SourceTree.app")
+        let sourceTreeURL = URL(fileURLWithPath: AppConstants.ExternalAppPath.sourceTree)
 
         if FileManager.default.fileExists(atPath: sourceTreeURL.path) {
             NSWorkspace.shared.open(
