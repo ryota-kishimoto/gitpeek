@@ -93,10 +93,19 @@ else
 fi
 
 if [ -f "$MENUBAR_SVG" ]; then
-    # Menu bar icon (black template, transparent)
+    # Menu bar icon (black template, transparent).
+    # rsvg-convert handles stroke-width and complex beziers more faithfully
+    # than ImageMagick at tiny sizes, so the 18/36px output is slightly less
+    # fuzzy. Falls back to magick if rsvg-convert is unavailable.
     echo "🎨 Copying menu bar icon..."
-    magick -background none "$MENUBAR_SVG" -resize 18x18 PNG32:GitPeek.app/Contents/Resources/MenuBarIcon.png
-    magick -background none "$MENUBAR_SVG" -resize 36x36 PNG32:GitPeek.app/Contents/Resources/MenuBarIcon@2x.png
+    if command -v rsvg-convert >/dev/null 2>&1; then
+        rsvg-convert -w 18 -h 18 "$MENUBAR_SVG" -o GitPeek.app/Contents/Resources/MenuBarIcon.png
+        rsvg-convert -w 36 -h 36 "$MENUBAR_SVG" -o GitPeek.app/Contents/Resources/MenuBarIcon@2x.png
+    else
+        echo "⚠️  rsvg-convert not found, falling back to magick (may look fuzzier)"
+        magick -background none "$MENUBAR_SVG" -resize 18x18 PNG32:GitPeek.app/Contents/Resources/MenuBarIcon.png
+        magick -background none "$MENUBAR_SVG" -resize 36x36 PNG32:GitPeek.app/Contents/Resources/MenuBarIcon@2x.png
+    fi
 else
     echo "⚠️  gitpeek-menubar.svg not found, skipping menu bar icon"
 fi
