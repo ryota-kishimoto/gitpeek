@@ -1,21 +1,13 @@
 import SwiftUI
-import Sparkle
 
 @main
 struct GitPeekApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self)
     var appDelegate
-    
+
     var body: some Scene {
         Settings {
             SettingsView()
-        }
-        .commands {
-            CommandGroup(after: .appInfo) {
-                Button("Check for Updates...") {
-                    appDelegate.updaterController.updater.checkForUpdates()
-                }
-            }
         }
     }
 }
@@ -24,15 +16,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var popover = NSPopover()
     private var eventMonitor: Any?
-    
-    // Sparkle updater controller
-    lazy var updaterController = SPUStandardUpdaterController(
-        startingUpdater: true,
-        updaterDelegate: nil,
-        userDriverDelegate: nil
-    )
-    
+
     func applicationDidFinishLaunching(_ notification: Notification) {
+        _ = SparkleUpdater.shared
         setupMenuBar()
     }
     
