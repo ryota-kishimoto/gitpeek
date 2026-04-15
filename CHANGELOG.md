@@ -2,6 +2,17 @@
 
 All notable changes to GitPeek will be documented in this file.
 
+## [1.5.3] - 2026-04-16
+
+### Fixed
+- Sparkle auto-update pipeline: sign DMG with Sparkle 2.9 CLI via stdin (was emitting an error string as the signature)
+- Release workflow: appcast.xml is now actually populated per release (heredoc escapes were preventing variable expansion)
+- Release workflow: release notes now contain real commit list instead of a single meta-commit (moved notes generation before appcast push and pinned the tag range explicitly)
+- Release workflow: push back to `main` instead of detached HEAD refspec
+
+### Changed
+- Clean up `appcast.xml` template (drop sample comment block)
+
 ## [1.5.2] - 2026-04-16
 
 ### Fixed
