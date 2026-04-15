@@ -2,6 +2,20 @@
 
 All notable changes to GitPeek will be documented in this file.
 
+## [1.5.2] - 2026-04-16
+
+### Fixed
+- Stop repeated macOS folder-access prompts by adding usage descriptions (#22)
+- Render menu bar icon with rsvg-convert for crisper 18/36px output (#27)
+
+### Changed
+- Establish SSOT for hardcoded values via AppConstants (#26)
+- Unbreak CI test job: actor-isolation, notification crash, stale test (#24)
+- Remove unused App Sandbox entitlements file (#23)
+- Add `.mcp.json.example` for XcodeBuildMCP server (#25)
+- Ignore local scratch files `.claude/scheduled_tasks.lock` and `icon-experiments/` (#28)
+- Bump GitHub Actions: actions/stale 9→10, actions/cache 3→5, amannn/action-semantic-pull-request 5→6, actions/upload-artifact 4→6, actions/checkout 4→6 (#11–15)
+
 ## [1.2.0] - 2025-01-18
 
 ### Added
