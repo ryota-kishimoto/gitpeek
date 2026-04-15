@@ -90,16 +90,30 @@ struct SettingsView: View {
                 Text("General Settings")
                     .font(.headline)
             }
-            
+
+            Section {
+                HStack {
+                    Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? AppConstants.Layout.versionFallback)")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Button("Check for Updates…") {
+                        SparkleUpdater.shared.checkForUpdates()
+                    }
+                }
+            } header: {
+                Text("Updates")
+                    .font(.headline)
+            }
+
             Spacer()
-            
+
             HStack {
                 Button("Reset to Defaults") {
                     resetToDefaults()
                 }
-                
+
                 Spacer()
-                
+
                 Button("About GitPeek") {
                     showingAbout = true
                 }
@@ -249,13 +263,10 @@ struct AboutView: View {
             
             Spacer()
             
-            // Auto-update check button
-            if let appDelegate = NSApp.delegate as? AppDelegate {
-                Button("Check for Updates...") {
-                    appDelegate.updaterController.updater.checkForUpdates()
-                }
-                .padding(.bottom, 8)
+            Button("Check for Updates…") {
+                SparkleUpdater.shared.checkForUpdates()
             }
+            .padding(.bottom, 8)
             
             Text(AppConstants.Layout.copyrightText)
                 .font(.caption)
