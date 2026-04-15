@@ -267,7 +267,21 @@ jobs:
           echo "--- release_notes.md ---"
           cat release_notes.md
 
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          prerelease: false
+          body_path: release_notes.md
+          files: |
+            GitPeek-${{ github.ref_name }}.dmg
+            GitPeek-${{ github.ref_name }}.dmg.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Update appcast.xml
+        id: update_appcast
+        continue-on-error: true
         env:
           TAG: ${{ github.ref_name }}
           SIGNATURE: ${{ steps.sparkle_sign.outputs.signature }}
@@ -333,20 +347,22 @@ jobs:
           git add appcast.xml
           if git diff --cached --quiet; then
             echo "No appcast.xml changes to commit"
-          else
-            git commit -m "chore: update appcast.xml for ${TAG}"
-            git push origin HEAD:main
+            exit 0
           fi
 
+          git commit -m "chore: update appcast.xml for ${TAG}"
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+          if git push origin HEAD:main; then
+            echo "✅ appcast.xml pushed to main"
+          else
+            echo "::warning::Failed to push appcast.xml to main (branch protection). The generated appcast.xml is uploaded as a workflow artifact — download it and push manually."
+            exit 1
+          fi
+
+      - name: Upload appcast.xml artifact on push failure
+        if: steps.update_appcast.outcome == 'failure'
+        uses: actions/upload-artifact@v6
         with:
-          draft: false
-          prerelease: false
-          body_path: release_notes.md
-          files: |
-            GitPeek-${{ github.ref_name }}.dmg
-            GitPeek-${{ github.ref_name }}.dmg.sha256
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: appcast-xml-${{ github.ref_name }}
+          path: appcast.xml
+          retention-days: 14
