@@ -2,6 +2,15 @@
 
 All notable changes to GitPeek will be documented in this file.
 
+## [1.5.4] - 2026-04-16
+
+### Fixed
+- Settings: add a dedicated "Check for Updates…" button to the General tab so menu bar users (LSUIElement) can actually trigger Sparkle manually (#29)
+- CI: replace archived `hmarr/auto-assign-action` with `actions/github-script` to unbreak PR Automation (#29)
+
+### Changed
+- Centralise Sparkle lifecycle in a single `SparkleUpdater` helper; drop fragile `NSApp.delegate as? AppDelegate` cast from AboutView (#29)
+
 ## [1.5.3] - 2026-04-16
 
 ### Fixed
