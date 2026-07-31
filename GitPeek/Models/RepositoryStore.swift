@@ -80,18 +80,18 @@ final class RepositoryStore: ObservableObject {
                 repositories[index] = updated
             }
 
-            // Optionally fetch in background (slow, but updates remote info)
+            // Optionally fetch (slow, but updates remote info).
+            // Awaited rather than detached so that a slow fetch delays this
+            // refresh cycle instead of overlapping with the next one.
             if shouldFetch {
-                Task { @MainActor in
-                    try? await gitCommand.fetch(at: path)
-                    // Re-check commit difference after fetch
-                    if let newCommitDiff = try? await gitCommand.getCommitDifference(at: path) {
-                        self.applyCommitDifference(
-                            id: id,
-                            behind: newCommitDiff.behind,
-                            ahead: newCommitDiff.ahead
-                        )
-                    }
+                try? await gitCommand.fetch(at: path)
+                // Re-check commit difference after fetch
+                if let newCommitDiff = try? await gitCommand.getCommitDifference(at: path) {
+                    applyCommitDifference(
+                        id: id,
+                        behind: newCommitDiff.behind,
+                        ahead: newCommitDiff.ahead
+                    )
                 }
             }
         } catch {

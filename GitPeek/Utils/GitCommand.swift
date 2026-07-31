@@ -94,7 +94,7 @@ final class GitCommand {
     func getStatus(at path: String) async throws -> GitStatus {
         try validateRepositoryPath(path)
         
-        let output = try await execute("git status --porcelain", at: path)
+        let output = try await execute("git --no-optional-locks status --porcelain", at: path)
         return parseGitStatusOutput(output)
     }
     
