@@ -50,6 +50,51 @@ final class GitCommandTests: XCTestCase {
         XCTAssertTrue(status.untrackedFiles.isEmpty, "Should have no untracked files")
     }
     
+    func testGetStatus_doesNotRewriteIndex() async throws {
+        // Arrange
+        // `git status` refreshes stale stat info by rewriting .git/index, which
+        // takes .git/index.lock. That races with the user's own `git checkout`
+        // and makes it fail with "Unable to create '.../index.lock'", so the
+        // monitoring path must leave the index untouched.
+        let gitCommand = GitCommand()
+        let file = testRepoPath + "/tracked.txt"
+        try "content".write(toFile: file, atomically: true, encoding: .utf8)
+        try runGit(["add", "tracked.txt"])
+        try runGit(["-c", "user.email=test@example.com", "-c", "user.name=test", "commit", "-m", "init"])
+
+        // Make the cached stat info stale so a refresh would be triggered.
+        let indexPath = testRepoPath + "/.git/index"
+        try FileManager.default.setAttributes(
+            [.modificationDate: Date(timeIntervalSince1970: 0)],
+            ofItemAtPath: file
+        )
+        let mtimeBefore = try indexModificationDate(at: indexPath)
+
+        // Act
+        _ = try await gitCommand.getStatus(at: testRepoPath)
+
+        // Assert
+        let mtimeAfter = try indexModificationDate(at: indexPath)
+        XCTAssertEqual(
+            mtimeBefore, mtimeAfter,
+            "getStatus must not rewrite .git/index, otherwise it competes for index.lock"
+        )
+    }
+
+    private func indexModificationDate(at path: String) throws -> Date {
+        let attributes = try FileManager.default.attributesOfItem(atPath: path)
+        return try XCTUnwrap(attributes[.modificationDate] as? Date)
+    }
+
+    private func runGit(_ arguments: [String]) throws {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+        process.arguments = arguments
+        process.currentDirectoryURL = URL(fileURLWithPath: testRepoPath)
+        try process.run()
+        process.waitUntilExit()
+    }
+
     func testIsValidRepository_returnsTrueForGitRepo() throws {
         // Act
         let isValid = GitCommand.isValidRepository(at: testRepoPath)
