@@ -361,7 +361,7 @@ jobs:
 
       - name: Upload appcast.xml artifact on push failure
         if: steps.update_appcast.outcome == 'failure'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: appcast-xml-${{ github.ref_name }}
           path: appcast.xml
